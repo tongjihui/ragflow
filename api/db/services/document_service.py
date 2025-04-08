@@ -100,6 +100,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def remove_document(cls, doc, tenant_id):
+        """
+        删除租户的指定doc文档
+        """
         cls.clear_chunk_num(doc.id)
         try:
             settings.docStoreConn.delete({"doc_id": doc.id}, search.index_name(tenant_id), doc.kb_id)
@@ -197,6 +200,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def clear_chunk_num(cls, doc_id):
+        """
+        更新doc文件对应知识库的信息，扣除此doc文件token_num等
+        """
         doc = cls.model.get_by_id(doc_id)
         assert doc, "Can't fine document in database."
 
@@ -213,6 +219,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_tenant_id(cls, doc_id):
+        """
+        获取指定文件的租户id
+        """
         docs = cls.model.select(
             Knowledgebase.tenant_id).join(
             Knowledgebase, on=(

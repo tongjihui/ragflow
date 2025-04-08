@@ -289,10 +289,16 @@ class RagTokenizer:
         return txt_lang_pairs
 
     def tokenize(self, line):
+        """
+        对文本进行分词和转换
+        """
+        # 将非单词字符转换为空格
         line = re.sub(r"\W+", " ", line)
+        # 拳脚字符转换为半角字符
         line = self._strQ2B(line).lower()
+        # 将繁体子转换为简体字
         line = self._tradi2simp(line)
-
+        # 按语言分割文本
         arr = self._split_by_lang(line)
         res = []
         for L,lang in arr:

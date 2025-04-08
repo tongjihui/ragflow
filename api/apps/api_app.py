@@ -50,6 +50,9 @@ from functools import partial
 @manager.route('/new_token', methods=['POST'])  # noqa: F821
 @login_required
 def new_token():
+    """
+    为当前登录用户生成一个新token，并保存到数据库
+    """
     req = request.json
     try:
         tenants = UserTenantService.query(user_id=current_user.id)
@@ -80,6 +83,9 @@ def new_token():
 @manager.route('/token_list', methods=['GET'])  # noqa: F821
 @login_required
 def token_list():
+    """
+    根据当前登录用户的租户id和指定的dialogId或canvasId，查询并返回用户在特定对话或agent的token列表
+    """
     try:
         tenants = UserTenantService.query(user_id=current_user.id)
         if not tenants:
@@ -96,6 +102,9 @@ def token_list():
 @validate_request("tokens", "tenant_id")
 @login_required
 def rm():
+    """
+    删除指定租户的tokens
+    """
     req = request.json
     try:
         for token in req["tokens"]:
@@ -109,6 +118,10 @@ def rm():
 @manager.route('/stats', methods=['GET'])  # noqa: F821
 @login_required
 def stats():
+    """
+    根据当前登录用户的租户id和指定的时间范围，统计并返回该用户在特定时间段内的对话相关数据
+    （如页面访问两、独立访客数、响应速度、令牌使用量）
+    """
     try:
         tenants = UserTenantService.query(user_id=current_user.id)
         if not tenants:
@@ -139,6 +152,10 @@ def stats():
 
 @manager.route('/new_conversation', methods=['GET'])  # noqa: F821
 def set_conversation():
+    """
+    为登录用户创建一个新的对话conversation，如果对话来源为agent则加载canvas配置，如果是普通对话则加载Dialog配置。
+    将新创建的对话保存到数据库并返回对话相关信息
+    """
     token = request.headers.get('Authorization').split()[1]
     objs = APIToken.query(token=token)
     if not objs:
@@ -180,6 +197,9 @@ def set_conversation():
 @manager.route('/completion', methods=['POST'])  # noqa: F821
 @validate_request("conversation_id", "messages")
 def completion():
+    """
+    根据用户提供的对话id和消息内容，生成和返回与当前对话相关的响应内容，支持流式响应和非流式响应
+    """
     token = request.headers.get('Authorization').split()[1]
     objs = APIToken.query(token=token)
     if not objs:
@@ -346,6 +366,9 @@ def completion():
 @manager.route('/conversation/<conversation_id>', methods=['GET'])  # noqa: F821
 # @login_required
 def get(conversation_id):
+    """
+    获取指定对话的详细信息
+    """
     token = request.headers.get('Authorization').split()[1]
     objs = APIToken.query(token=token)
     if not objs:
@@ -377,6 +400,9 @@ def get(conversation_id):
 @manager.route('/document/upload', methods=['POST'])  # noqa: F821
 @validate_request("kb_name")
 def upload():
+    """
+    处理文件上传请求，将文件存储到对应知识库，并生成对应文档记录
+    """
     token = request.headers.get('Authorization').split()[1]
     objs = APIToken.query(token=token)
     if not objs:
@@ -489,6 +515,9 @@ def upload():
 @manager.route('/document/upload_and_parse', methods=['POST'])  # noqa: F821
 @validate_request("conversation_id")
 def upload_parse():
+    """
+    上传文件并解析，将解析结果与指定对话关联
+    """
     token = request.headers.get('Authorization').split()[1]
     objs = APIToken.query(token=token)
     if not objs:
@@ -512,6 +541,9 @@ def upload_parse():
 @manager.route('/list_chunks', methods=['POST'])  # noqa: F821
 # @login_required
 def list_chunks():
+    """
+    根据文档名称或文档id查询并返回文档的分块列表chunks
+    """
     token = request.headers.get('Authorization').split()[1]
     objs = APIToken.query(token=token)
     if not objs:
@@ -552,6 +584,9 @@ def list_chunks():
 @manager.route('/list_kb_docs', methods=['POST'])  # noqa: F821
 # @login_required
 def list_kb_docs():
+    """
+    根据知识库名称查询该知识库的文档列表，并支持分页、排序和关键词过滤
+    """
     token = request.headers.get('Authorization').split()[1]
     objs = APIToken.query(token=token)
     if not objs:
@@ -592,6 +627,9 @@ def list_kb_docs():
 @manager.route('/document/infos', methods=['POST'])  # noqa: F821
 @validate_request("doc_ids")
 def docinfos():
+    """
+    根据docIds查询对应文档的详细信息
+    """
     token = request.headers.get('Authorization').split()[1]
     objs = APIToken.query(token=token)
     if not objs:
@@ -606,6 +644,9 @@ def docinfos():
 @manager.route('/document', methods=['DELETE'])  # noqa: F821
 # @login_required
 def document_rm():
+    """
+    根据文档名称和文档ids删除指定的文档及其关联的数据（如文件存储、数据库记录等）
+    """
     token = request.headers.get('Authorization').split()[1]
     objs = APIToken.query(token=token)
     if not objs:
@@ -665,6 +706,9 @@ def document_rm():
 @manager.route('/completion_aibotk', methods=['POST'])  # noqa: F821
 @validate_request("Authorization", "conversation_id", "word")
 def completion_faq():
+    """
+    根据用户提供的对话ID和输入内容（word），生成与当前对话相关的响应内容，该方法支持两种对话来源：agent和dialog
+    """
     import base64
     req = request.json
 
@@ -807,6 +851,9 @@ def completion_faq():
 @manager.route('/retrieval', methods=['POST'])  # noqa: F821
 @validate_request("kb_id", "question")
 def retrieval():
+    """
+    根据用户的question和知识库id，从指定知识库检索与问题相关的文档片段chunks
+    """
     token = request.headers.get('Authorization').split()[1]
     objs = APIToken.query(token=token)
     if not objs:

@@ -38,6 +38,7 @@ from api.utils.api_utils import (
 @token_required
 def create(tenant_id):
     """
+    创建一个数据集
     Create a new dataset.
     ---
     tags:
@@ -201,6 +202,7 @@ def create(tenant_id):
 @token_required
 def delete(tenant_id):
     """
+    删除数据集
     Delete datasets.
     ---
     tags:
@@ -283,6 +285,7 @@ def delete(tenant_id):
 @token_required
 def update(tenant_id, dataset_id):
     """
+    更新一个数据集
     Update a dataset.
     ---
     tags:
@@ -458,6 +461,7 @@ def update(tenant_id, dataset_id):
 @token_required
 def list_datasets(tenant_id):
     """
+    query方式查询租户的数据集列表
     List datasets.
     ---
     tags:

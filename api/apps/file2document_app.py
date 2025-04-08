@@ -32,6 +32,10 @@ from api.utils.api_utils import get_json_result
 @login_required
 @validate_request("file_ids", "kb_ids")
 def convert():
+    """
+    将指定的文件转换为文档，并将其与指定的知识库关联，如果文件已有关联的文档，会先删除旧的关联和文档，
+    然后重新创建新的文档和关联关系
+    """
     req = request.json
     kb_ids = req["kb_ids"]
     file_ids = req["file_ids"]
@@ -96,6 +100,9 @@ def convert():
 @login_required
 @validate_request("file_ids")
 def rm():
+    """
+    删除指定文件与文档之间的关联关系，并删除对应的文档及其相关数据
+    """
     req = request.json
     file_ids = req["file_ids"]
     if not file_ids:

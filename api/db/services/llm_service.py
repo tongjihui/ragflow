@@ -222,7 +222,13 @@ class TenantLLMService(CommonService):
 
 
 class LLMBundle:
+    """
+    封装了LLM语言模型的实例的类，调用管理不同类型的语言模型（嵌入模型、重排序模型、图像转文本模型）
+    """
     def __init__(self, tenant_id, llm_type, llm_name=None, lang="Chinese"):
+        """
+        初始化语言模型实例
+        """
         self.tenant_id = tenant_id
         self.llm_type = llm_type
         self.llm_name = llm_name
@@ -234,6 +240,9 @@ class LLMBundle:
         self.max_length = model_config.get("max_tokens", 8192)
 
     def encode(self, texts: list):
+        """
+        对输入的文本列表进行编码生成嵌入向量，并更新模型token使用情况
+        """
         embeddings, used_tokens = self.mdl.encode(texts)
         if not TenantLLMService.increase_usage(
                 self.tenant_id, self.llm_type, used_tokens):
@@ -242,6 +251,9 @@ class LLMBundle:
         return embeddings, used_tokens
 
     def encode_queries(self, query: str):
+        """
+        对单个查询字符串（question）进行编码生成嵌入向量，并更新模型token使用情况
+        """
         emd, used_tokens = self.mdl.encode_queries(query)
         if not TenantLLMService.increase_usage(
                 self.tenant_id, self.llm_type, used_tokens):
@@ -250,6 +262,9 @@ class LLMBundle:
         return emd, used_tokens
 
     def similarity(self, query: str, texts: list):
+        """
+        计算查询字符串query与文本列表texts之间的相似度，并更新模型token使用情况
+        """
         sim, used_tokens = self.mdl.similarity(query, texts)
         if not TenantLLMService.increase_usage(
                 self.tenant_id, self.llm_type, used_tokens):
@@ -258,6 +273,9 @@ class LLMBundle:
         return sim, used_tokens
 
     def describe(self, image, max_tokens=300):
+        """
+        根据图像生成文本，并更新模型token使用情况
+        """
         txt, used_tokens = self.mdl.describe(image, max_tokens)
         if not TenantLLMService.increase_usage(
                 self.tenant_id, self.llm_type, used_tokens):
@@ -266,6 +284,9 @@ class LLMBundle:
         return txt
 
     def describe_with_prompt(self, image, prompt):
+        """
+        根据图像image结合提示文本prompt生成最终文本，并更新模型的token使用情况
+        """
         txt, used_tokens = self.mdl.describe_with_prompt(image, prompt)
         if not TenantLLMService.increase_usage(
                 self.tenant_id, self.llm_type, used_tokens):
@@ -274,6 +295,9 @@ class LLMBundle:
         return txt
 
     def transcription(self, audio):
+        """
+        将音频转换为文本，并更新模型的token使用情况
+        """
         txt, used_tokens = self.mdl.transcription(audio)
         if not TenantLLMService.increase_usage(
                 self.tenant_id, self.llm_type, used_tokens):
@@ -282,6 +306,9 @@ class LLMBundle:
         return txt
 
     def tts(self, text):
+        """
+        将文本转语音，并更新模型token使用情况
+        """
         for chunk in self.mdl.tts(text):
             if isinstance(chunk, int):
                 if not TenantLLMService.increase_usage(
@@ -292,6 +319,10 @@ class LLMBundle:
             yield chunk
 
     def chat(self, system, history, gen_conf):
+        """
+        进行聊天对话
+        根据生成配置gen_conf、系统消息system，对话历史history生成对话文本，并更新模型的token使用情况
+        """
         txt, used_tokens = self.mdl.chat(system, history, gen_conf)
         if isinstance(txt, int) and not TenantLLMService.increase_usage(
                 self.tenant_id, self.llm_type, used_tokens, self.llm_name):
@@ -301,6 +332,10 @@ class LLMBundle:
         return txt
 
     def chat_streamly(self, system, history, gen_conf):
+        """
+        进行流式对话
+        基于系统消息system、对话历史history、生成配置gen_conf生成对话文本块，并更新模型的token使用情况
+        """
         for txt in self.mdl.chat_streamly(system, history, gen_conf):
             if isinstance(txt, int):
                 if not TenantLLMService.increase_usage(

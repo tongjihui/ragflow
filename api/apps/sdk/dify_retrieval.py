@@ -27,6 +27,9 @@ from rag.app.tag import label_question
 @apikey_required
 @validate_request("knowledge_id", "query")
 def retrieval(tenant_id):
+    """
+    从指定知识库检索与用户问题相关的知识片段
+    """
     req = request.json
     question = req["query"]
     kb_id = req["knowledge_id"]
@@ -43,9 +46,9 @@ def retrieval(tenant_id):
 
         if kb.tenant_id != tenant_id:
             return build_error_result(message="Knowledgebase not found!", code=settings.RetCode.NOT_FOUND)
-
+        # 获取知识库的Embedding模型
         embd_mdl = LLMBundle(kb.tenant_id, LLMType.EMBEDDING.value, llm_name=kb.embd_id)
-
+        # 调用知识库检索服务
         ranks = settings.retrievaler.retrieval(
             question,
             embd_mdl,
@@ -58,7 +61,7 @@ def retrieval(tenant_id):
             top=top,
             rank_feature=label_question(question, [kb])
         )
-
+        # 调用知识图谱检索服务
         if use_kg:
             ck = settings.kg_retrievaler.retrieval(question,
                                                    [tenant_id],

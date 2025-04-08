@@ -40,6 +40,9 @@ from flask import jsonify, request, Response
 @manager.route('/chats/<chat_id>/sessions', methods=['POST'])  # noqa: F821
 @token_required
 def create(tenant_id, chat_id):
+    """
+    支持为特定chatId创建新的聊天会话assistant
+    """
     req = request.json
     req["dialog_id"] = chat_id
     dia = DialogService.query(tenant_id=tenant_id, id=req["dialog_id"], status=StatusEnum.VALID.value)
@@ -68,6 +71,9 @@ def create(tenant_id, chat_id):
 @manager.route('/agents/<agent_id>/sessions', methods=['POST'])  # noqa: F821
 @token_required
 def create_agent_session(tenant_id, agent_id):
+    """
+    创建新的agent对话
+    """
     req = request.json
     if not request.is_json:
         req = request.form
@@ -137,6 +143,9 @@ def create_agent_session(tenant_id, agent_id):
 @manager.route('/chats/<chat_id>/sessions/<session_id>', methods=['PUT'])  # noqa: F821
 @token_required
 def update(tenant_id, chat_id, session_id):
+    """
+    更新指定会话session的信息
+    """
     req = request.json
     req["dialog_id"] = chat_id
     conv_id = session_id
@@ -159,6 +168,9 @@ def update(tenant_id, chat_id, session_id):
 @manager.route('/chats/<chat_id>/completions', methods=['POST'])  # noqa: F821
 @token_required
 def chat_completion(tenant_id, chat_id):
+    """
+    处理聊天对话的不全请求，返回完成的对话信息
+    """
     req = request.json
     if not req:
         req = {"question": ""}
@@ -190,6 +202,7 @@ def chat_completion(tenant_id, chat_id):
 @token_required
 def chat_completion_openai_like(tenant_id, chat_id):
     """
+    一个模拟 OpenAI 风格的聊天补全（Chat Completion）API 的功能，支持基于历史对话消息生成回复
     OpenAI-like chat completion API that simulates the behavior of OpenAI's completions endpoint.
     
     This function allows users to interact with a model and receive responses based on a series of historical messages.
@@ -353,6 +366,9 @@ def chat_completion_openai_like(tenant_id, chat_id):
 @manager.route('/agents/<agent_id>/completions', methods=['POST'])  # noqa: F821
 @token_required
 def agent_completions(tenant_id, agent_id):
+    """
+    agent对话补全
+    """
     req = request.json
     cvs = UserCanvasService.query(user_id=tenant_id, id=agent_id)
     if not cvs:
@@ -398,6 +414,9 @@ def agent_completions(tenant_id, agent_id):
 @manager.route('/chats/<chat_id>/sessions', methods=['GET'])  # noqa: F821
 @token_required
 def list_session(tenant_id, chat_id):
+    """
+    获取特定聊天对话下所有会话
+    """
     if not DialogService.query(tenant_id=tenant_id, id=chat_id, status=StatusEnum.VALID.value):
         return get_error_data_result(message=f"You don't own the assistant {chat_id}.")
     id = request.args.get("id")
@@ -451,6 +470,9 @@ def list_session(tenant_id, chat_id):
 @manager.route('/agents/<agent_id>/sessions', methods=['GET'])  # noqa: F821
 @token_required
 def list_agent_session(tenant_id, agent_id):
+    """
+    获取特定agent下的所有会话
+    """
     if not UserCanvasService.query(user_id=tenant_id, id=agent_id):
         return get_error_data_result(message=f"You don't own the agent {agent_id}.")
     id = request.args.get("id")
@@ -505,6 +527,9 @@ def list_agent_session(tenant_id, agent_id):
 @manager.route('/chats/<chat_id>/sessions', methods=["DELETE"])  # noqa: F821
 @token_required
 def delete(tenant_id, chat_id):
+    """
+    删除指定聊天对话chatId下所有会话sessions
+    """
     if not DialogService.query(id=chat_id, tenant_id=tenant_id, status=StatusEnum.VALID.value):
         return get_error_data_result(message="You don't own the chat")
     req = request.json
@@ -531,6 +556,9 @@ def delete(tenant_id, chat_id):
 @manager.route('/agents/<agent_id>/sessions', methods=["DELETE"])  # noqa: F821
 @token_required
 def delete_agent_session(tenant_id, agent_id):
+    """
+    删除特定agent下的会话sessions
+    """
     req = request.json
     cvs = UserCanvasService.query(user_id=tenant_id, id=agent_id)
     if not cvs:
@@ -563,6 +591,9 @@ def delete_agent_session(tenant_id, agent_id):
 @manager.route('/sessions/ask', methods=['POST'])  # noqa: F821
 @token_required
 def ask_about(tenant_id):
+    """
+    根据用户提问返回结果
+    """
     req = request.json
     if not req.get("question"):
         return get_error_data_result("`question` is required.")
@@ -602,6 +633,9 @@ def ask_about(tenant_id):
 @manager.route('/sessions/related_questions', methods=['POST'])  # noqa: F821
 @token_required
 def related_questions(tenant_id):
+    """
+    根据用户的问题生成一组相关的搜索词
+    """
     req = request.json
     if not req.get("question"):
         return get_error_data_result("`question` is required.")
@@ -640,6 +674,9 @@ Related search terms:
 
 @manager.route('/chatbots/<dialog_id>/completions', methods=['POST'])  # noqa: F821
 def chatbot_completions(dialog_id):
+    """
+    处理指定对话机器人charbot的对话补全请求，支持流式和非流式相响应
+    """
     req = request.json
 
     token = request.headers.get('Authorization').split()
@@ -667,6 +704,9 @@ def chatbot_completions(dialog_id):
 
 @manager.route('/agentbots/<agent_id>/completions', methods=['POST'])  # noqa: F821
 def agent_bot_completions(agent_id):
+    """
+    针对指定的agent的对话补全请求，支持流式和非流式返回
+    """
     req = request.json
 
     token = request.headers.get('Authorization').split()

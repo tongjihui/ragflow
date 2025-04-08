@@ -49,6 +49,9 @@ MAXIMUM_OF_UPLOADING_FILES = 256
 
 
 class Chunk(BaseModel):
+    """
+    定义文档的块所包含的字段
+    """
     id: str = ""
     content: str = ""
     document_id: str = ""
@@ -62,6 +65,7 @@ class Chunk(BaseModel):
 
     @validator('positions')
     def validate_positions(cls, value):
+        # 对positions的值进行校验
         for sublist in value:
             if len(sublist) != 5:
                 raise ValueError("Each sublist in positions must have a length of 5")
@@ -72,6 +76,7 @@ class Chunk(BaseModel):
 @token_required
 def upload(dataset_id, tenant_id):
     """
+    上传一个/多个文件到某个数据集上
     Upload documents to a dataset.
     ---
     tags:
@@ -184,6 +189,7 @@ def upload(dataset_id, tenant_id):
 @token_required
 def update_doc(tenant_id, dataset_id, document_id):
     """
+    更新指定数据集下的文件
     Update a document within a dataset.
     ---
     tags:
@@ -339,6 +345,7 @@ def update_doc(tenant_id, dataset_id, document_id):
 @token_required
 def download(tenant_id, dataset_id, document_id):
     """
+    下载指定数据集的文件
     Download a document from a dataset.
     ---
     tags:
@@ -407,6 +414,7 @@ def download(tenant_id, dataset_id, document_id):
 @token_required
 def list_docs(dataset_id, tenant_id):
     """
+    获取指定数据集的文件列表
     List documents in a dataset.
     ---
     tags:
@@ -543,6 +551,7 @@ def list_docs(dataset_id, tenant_id):
 @token_required
 def delete(tenant_id, dataset_id):
     """
+    删除指定数据集的所有doc文件
     Delete documents from a dataset.
     ---
     tags:
@@ -640,6 +649,7 @@ def delete(tenant_id, dataset_id):
 @token_required
 def parse(tenant_id, dataset_id):
     """
+    将指定数据集的多个doc文件解析成chunks
     Start parsing documents into chunks.
     ---
     tags:
@@ -686,6 +696,7 @@ def parse(tenant_id, dataset_id):
         if not doc:
             not_found.append(id)
             continue
+        # 此if永远不会触发，应该删除
         if not doc:
             return get_error_data_result(message=f"You don't own the document {id}.")
         if 0.0 < doc[0].progress < 1.0:
@@ -712,6 +723,7 @@ def parse(tenant_id, dataset_id):
 @token_required
 def stop_parsing(tenant_id, dataset_id):
     """
+    停止解析doc文件为chunks的行为
     Stop parsing documents into chunks.
     ---
     tags:
@@ -761,7 +773,9 @@ def stop_parsing(tenant_id, dataset_id):
                 "Can't stop parsing document with progress at 0 or 1"
             )
         info = {"run": "2", "progress": 0, "chunk_num": 0}
+        # 更新文档解析状态，重置解析进度和块数量
         DocumentService.update_by_id(id, info)
+        # 删除文档的块数据
         settings.docStoreConn.delete({"doc_id": doc[0].id}, search.index_name(tenant_id), dataset_id)
     return get_result()
 
@@ -770,6 +784,7 @@ def stop_parsing(tenant_id, dataset_id):
 @token_required
 def list_chunks(tenant_id, dataset_id, document_id):
     """
+    获取指定文档的所有块chunks或者特定块
     List chunks of a document.
     ---
     tags:
@@ -939,6 +954,7 @@ def list_chunks(tenant_id, dataset_id, document_id):
 @token_required
 def add_chunk(tenant_id, dataset_id, document_id):
     """
+    向指定文档添加一个新的块chunk
     Add a chunk to a document.
     ---
     tags:
@@ -1080,6 +1096,7 @@ def add_chunk(tenant_id, dataset_id, document_id):
 @token_required
 def rm_chunk(tenant_id, dataset_id, document_id):
     """
+    删除指定doc文件的多个块chunks
     Remove chunks from a document.
     ---
     tags:
@@ -1140,6 +1157,7 @@ def rm_chunk(tenant_id, dataset_id, document_id):
 @token_required
 def update_chunk(tenant_id, dataset_id, document_id, chunk_id):
     """
+    更新doc文件的一个块chunk
     Update a chunk within a document.
     ---
     tags:
@@ -1248,6 +1266,7 @@ def update_chunk(tenant_id, dataset_id, document_id, chunk_id):
 @token_required
 def retrieval_test(tenant_id):
     """
+    根据query字符串检索相关的文档块
     Retrieve chunks based on a query.
     ---
     tags:

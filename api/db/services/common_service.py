@@ -220,6 +220,9 @@ class CommonService:
     @classmethod
     @DB.connection_context()
     def get_by_id(cls, pid):
+        """
+        根据pid获取对应记录
+        """
         # Get a record by ID
         # Args:
         #     pid: Record ID

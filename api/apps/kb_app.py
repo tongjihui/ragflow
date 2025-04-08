@@ -40,6 +40,9 @@ from rag.settings import PAGERANK_FLD
 @login_required
 @validate_request("name")
 def create():
+    """
+    创建一个新的知识库，检查名称合法性并确保唯一性，保存到数据库后返回新创建的知识库ID
+    """
     req = request.json
     dataset_name = req["name"]
     if not isinstance(dataset_name, str):
@@ -76,6 +79,9 @@ def create():
 @validate_request("kb_id", "name", "description", "permission", "parser_id")
 @not_allowed_parameters("id", "tenant_id", "created_by", "create_time", "update_time", "create_date", "update_date", "created_by")
 def update():
+    """
+    更新指定知识库的详细信息（如名称、描述、权限等），确保名称唯一性，并同步更新相关的文档存储配置
+    """
     req = request.json
     req["name"] = req["name"].strip()
     if not KnowledgebaseService.accessible4deletion(req["kb_id"], current_user.id):
@@ -137,6 +143,9 @@ def update():
 @manager.route('/detail', methods=['GET'])  # noqa: F821
 @login_required
 def detail():
+    """
+    获取指定知识库的详细信息，包括其元数据和关联的租户信息
+    """
     kb_id = request.args["kb_id"]
     try:
         tenants = UserTenantService.query(user_id=current_user.id)
@@ -160,6 +169,9 @@ def detail():
 @manager.route('/list', methods=['GET'])  # noqa: F821
 @login_required
 def list_kbs():
+    """
+    列出当前用户可访问的所有知识库，支持分页、排序和关键词搜索
+    """
     keywords = request.args.get("keywords", "")
     page_number = int(request.args.get("page", 1))
     items_per_page = int(request.args.get("page_size", 150))
@@ -180,6 +192,9 @@ def list_kbs():
 @login_required
 @validate_request("kb_id")
 def rm():
+    """
+    删除指定的知识库及其关联的所有文档、文件和索引数据，确保彻底清理相关资源
+    """
     req = request.json
     if not KnowledgebaseService.accessible4deletion(req["kb_id"], current_user.id):
         return get_json_result(
@@ -219,6 +234,9 @@ def rm():
 @manager.route('/<kb_id>/tags', methods=['GET'])  # noqa: F821
 @login_required
 def list_tags(kb_id):
+    """
+    列出指定知识库中的所有标签
+    """
     if not KnowledgebaseService.accessible(kb_id, current_user.id):
         return get_json_result(
             data=False,
@@ -233,6 +251,9 @@ def list_tags(kb_id):
 @manager.route('/tags', methods=['GET'])  # noqa: F821
 @login_required
 def list_tags_from_kbs():
+    """
+    列出多个指定知识库中的所有标签
+    """
     kb_ids = request.args.get("kb_ids", "").split(",")
     for kb_id in kb_ids:
         if not KnowledgebaseService.accessible(kb_id, current_user.id):
@@ -249,6 +270,9 @@ def list_tags_from_kbs():
 @manager.route('/<kb_id>/rm_tags', methods=['POST'])  # noqa: F821
 @login_required
 def rm_tags(kb_id):
+    """
+    从指定知识库中移除指定的标签
+    """
     req = request.json
     if not KnowledgebaseService.accessible(kb_id, current_user.id):
         return get_json_result(
@@ -269,6 +293,9 @@ def rm_tags(kb_id):
 @manager.route('/<kb_id>/rename_tag', methods=['POST'])  # noqa: F821
 @login_required
 def rename_tags(kb_id):
+    """
+    在指定知识库中重命名标签，将旧标签替换为新标签
+    """
     req = request.json
     if not KnowledgebaseService.accessible(kb_id, current_user.id):
         return get_json_result(
@@ -288,6 +315,9 @@ def rename_tags(kb_id):
 @manager.route('/<kb_id>/knowledge_graph', methods=['GET'])  # noqa: F821
 @login_required
 def knowledge_graph(kb_id):
+    """
+    获取指定知识库的知识图谱和思维导图数据，支持节点和边的过滤与排序
+    """
     if not KnowledgebaseService.accessible(kb_id, current_user.id):
         return get_json_result(
             data=False,

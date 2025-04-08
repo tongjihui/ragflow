@@ -53,6 +53,9 @@ from api.constants import IMG_BASE64_PREFIX
 @login_required
 @validate_request("kb_id")
 def upload():
+    """
+    上传文件到指定知识库，并返回上传文件的信息
+    """
     kb_id = request.form.get("kb_id")
     if not kb_id:
         return get_json_result(
@@ -84,6 +87,9 @@ def upload():
 @login_required
 @validate_request("kb_id", "name", "url")
 def web_crawl():
+    """
+    根据提供的URL抓取网页内容，将其转换为PDF文件并存储到知识库中
+    """
     kb_id = request.form.get("kb_id")
     if not kb_id:
         return get_json_result(
@@ -151,6 +157,9 @@ def web_crawl():
 @login_required
 @validate_request("name", "kb_id")
 def create():
+    """
+    创建一个新的虚拟文档（不涉及实际文件上传），并将其与指定的知识库关联
+    """
     req = request.json
     kb_id = req["kb_id"]
     if not kb_id:
@@ -186,6 +195,9 @@ def create():
 @manager.route('/list', methods=['GET'])  # noqa: F821
 @login_required
 def list_docs():
+    """
+    列出指定知识库中的所有文档，支持分页、排序和关键词搜索
+    """
     kb_id = request.args.get("kb_id")
     if not kb_id:
         return get_json_result(
@@ -221,6 +233,9 @@ def list_docs():
 @manager.route('/infos', methods=['POST'])  # noqa: F821
 @login_required
 def docinfos():
+    """
+    批量获取指定文档的详细信息
+    """
     req = request.json
     doc_ids = req["doc_ids"]
     for doc_id in doc_ids:
@@ -237,6 +252,9 @@ def docinfos():
 @manager.route('/thumbnails', methods=['GET'])  # noqa: F821
 # @login_required
 def thumbnails():
+    """
+    获取指定文档的缩略图信息，并返回其URL或Base64编码
+    """
     doc_ids = request.args.get("doc_ids").split(",")
     if not doc_ids:
         return get_json_result(
@@ -258,6 +276,9 @@ def thumbnails():
 @login_required
 @validate_request("doc_id", "status")
 def change_status():
+    """
+    修改文档的状态（启用/禁用），并同步更新到相关索引中
+    """
     req = request.json
     if str(req["status"]) not in ["0", "1"]:
         return get_json_result(
@@ -297,6 +318,9 @@ def change_status():
 @login_required
 @validate_request("doc_id")
 def rm():
+    """
+    删除指定的文档，包括从数据库中移除以及清理存储中的文件
+    """
     req = request.json
     doc_ids = req["doc_id"]
     if isinstance(doc_ids, str):
@@ -347,7 +371,10 @@ def rm():
 @manager.route('/run', methods=['POST'])  # noqa: F821
 @login_required
 @validate_request("doc_ids", "run")
-def run(): 
+def run():
+    """
+    启动或停止文档的解析任务，并根据需要重新排队任务
+    """
     req = request.json
     for doc_id in req["doc_ids"]:
         if not DocumentService.accessible(doc_id, current_user.id):
@@ -391,6 +418,9 @@ def run():
 @login_required
 @validate_request("doc_id", "name")
 def rename():
+    """
+    修改文档名称，确保名称在知识库中唯一且扩展名不变
+    """
     req = request.json
     if not DocumentService.accessible(req["doc_id"], current_user.id):
         return get_json_result(
@@ -431,6 +461,9 @@ def rename():
 @manager.route('/get/<doc_id>', methods=['GET'])  # noqa: F821
 # @login_required
 def get(doc_id):
+    """
+    下载指定文档的内容，支持根据文件类型设置正确的MIME类型
+    """
     try:
         e, doc = DocumentService.get_by_id(doc_id)
         if not e:
@@ -457,6 +490,9 @@ def get(doc_id):
 @login_required
 @validate_request("doc_id", "parser_id")
 def change_parser():
+    """
+    更改文档的解释器类型，并重置解析进度
+    """
     req = request.json
 
     if not DocumentService.accessible(req["doc_id"], current_user.id):
@@ -507,6 +543,9 @@ def change_parser():
 @manager.route('/image/<image_id>', methods=['GET'])  # noqa: F821
 # @login_required
 def get_image(image_id):
+    """
+    获取指定图片的二进制内容并返回
+    """
     try:
         arr = image_id.split("-")
         if len(arr) != 2:
@@ -523,6 +562,9 @@ def get_image(image_id):
 @login_required
 @validate_request("conversation_id")
 def upload_and_parse():
+    """
+    上传文件并立即启动解析任务，返回解析后的文档ID
+    """
     if 'file' not in request.files:
         return get_json_result(
             data=False, message='No file part!', code=settings.RetCode.ARGUMENT_ERROR)
@@ -541,6 +583,9 @@ def upload_and_parse():
 @manager.route('/parse', methods=['POST'])  # noqa: F821
 @login_required
 def parse():
+    """
+    解析上传的文件或抓取的网页内容，返回解析结果文本
+    """
     url = request.json.get("url") if request.json else ""
     if url:
         if not is_valid_url(url):
@@ -602,6 +647,9 @@ def parse():
 @login_required
 @validate_request("doc_id", "meta")
 def set_meta():
+    """
+    设置文档的元数据，支持JSON格式的键值对
+    """
     req = request.json
     if not DocumentService.accessible(req["doc_id"], current_user.id):
         return get_json_result(

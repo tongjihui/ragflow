@@ -30,6 +30,9 @@ from api.utils.api_utils import get_result
 @manager.route('/chats', methods=['POST'])  # noqa: F821
 @token_required
 def create(tenant_id):
+    """
+    创建一个新的聊天对话
+    """
     req = request.json
     ids = [i for i in req.get("dataset_ids", []) if i] 
     for kb_id in ids:
@@ -164,6 +167,9 @@ def create(tenant_id):
 @manager.route('/chats/<chat_id>', methods=['PUT'])  # noqa: F821
 @token_required
 def update(tenant_id, chat_id):
+    """
+    更新一个已有的聊天对话
+    """
     if not DialogService.query(tenant_id=tenant_id, id=chat_id, status=StatusEnum.VALID.value):
         return get_error_data_result(message='You do not own the chat')
     req = request.json
@@ -262,6 +268,9 @@ def update(tenant_id, chat_id):
 @manager.route('/chats', methods=['DELETE'])  # noqa: F821
 @token_required
 def delete(tenant_id):
+    """
+    删除一个已有的聊天对话
+    """
     req = request.json
     if not req:
         ids = None
@@ -285,6 +294,9 @@ def delete(tenant_id):
 @manager.route('/chats', methods=['GET'])  # noqa: F821
 @token_required
 def list_chat(tenant_id):
+    """
+    获取当前租户的多个聊天对话列表
+    """
     id = request.args.get("id")
     name = request.args.get("name")
     if id or name:

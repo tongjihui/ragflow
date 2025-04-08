@@ -31,6 +31,10 @@ from rag.llm import EmbeddingModel, ChatModel, RerankModel, CvModel, TTSModel
 @manager.route('/factories', methods=['GET'])  # noqa: F821
 @login_required
 def factories():
+    """
+    列出所有可用的大预言模型(LLM)工厂及其支持的模型类型，过滤掉特定的工厂(如Youdao、FastEmbed和BAAI)
+    并返回每个工厂支持的模型类型列表
+    """
     try:
         fac = LLMFactoriesService.get_all()
         fac = [f.to_dict() for f in fac if f.name not in ["Youdao", "FastEmbed", "BAAI"]]
@@ -54,6 +58,10 @@ def factories():
 @login_required
 @validate_request("llm_factory", "api_key")
 def set_api_key():
+    """
+    设置指定LLM工厂的API密钥，并验证密钥的有效性（针对嵌入式模型、聊天模型和重排序模型）
+    如果验证通过，则保存或更新密钥配置
+    """
     req = request.json
     # test if api key works
     chat_passed, embd_passed, rerank_passed = False, False, False
@@ -136,6 +144,10 @@ def set_api_key():
 @login_required
 @validate_request("llm_factory")
 def add_llm():
+    """
+    添加一个新的LLM配置，支持多种工厂（如VolcEngine、Tencent Cloud、HuggingFace等），
+    并根据模型类型（如嵌入式、聊天、图像转文本等）进行测试，如果测试通过，则保存配置
+    """
     req = request.json
     factory = req["llm_factory"]
     api_key = req.get("api_key", "x")
@@ -291,6 +303,9 @@ def add_llm():
 @login_required
 @validate_request("llm_factory", "llm_name")
 def delete_llm():
+    """
+    删除指定的LLM配置（通过工厂名称和模型名称定位）
+    """
     req = request.json
     TenantLLMService.filter_delete(
         [TenantLLM.tenant_id == current_user.id, TenantLLM.llm_factory == req["llm_factory"],
@@ -302,6 +317,9 @@ def delete_llm():
 @login_required
 @validate_request("llm_factory")
 def delete_factory():
+    """
+    删除指定工厂下的所有LLM配置
+    """
     req = request.json
     TenantLLMService.filter_delete(
         [TenantLLM.tenant_id == current_user.id, TenantLLM.llm_factory == req["llm_factory"]])
@@ -311,6 +329,9 @@ def delete_factory():
 @manager.route('/my_llms', methods=['GET'])  # noqa: F821
 @login_required
 def my_llms():
+    """
+    获取当前用户已配置的所有LLM信息，按工厂分组，并返回每种模型的类型、名称和已使用的令牌数
+    """
     try:
         res = {}
         for o in TenantLLMService.get_my_llms(current_user.id):
@@ -332,6 +353,9 @@ def my_llms():
 @manager.route('/list', methods=['GET'])  # noqa: F821
 @login_required
 def list_app():
+    """
+    列出当前用户可访问的所有LLM模型，包括系统预置模型和用户自定义模型，并支持按模型类型过滤
+    """
     self_deployed = ["Youdao", "FastEmbed", "BAAI", "Ollama", "Xinference", "LocalAI", "LM-Studio", "GPUStack"]
     weighted = ["Youdao", "FastEmbed", "BAAI"] if settings.LIGHTEN != 0 else []
     model_type = request.args.get("model_type")

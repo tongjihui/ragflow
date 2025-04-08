@@ -39,6 +39,9 @@ from rag.app.tag import label_question
 @manager.route('/set', methods=['POST'])  # noqa: F821
 @login_required
 def set_conversation():
+    """
+    创建或更新会话信息，如果是新会话则保存，否则更新现有会话
+    """
     req = request.json
     conv_id = req.get("conversation_id")
     is_new = req.get("is_new")
@@ -76,6 +79,9 @@ def set_conversation():
 @manager.route('/get', methods=['GET'])  # noqa: F821
 @login_required
 def get():
+    """
+    根据会话ID获取会话详情，包含引用内容和头像等信息
+    """
     conv_id = request.args["conversation_id"]
     try:
 
@@ -118,7 +124,9 @@ def get():
 
 @manager.route('/getsse/<dialog_id>', methods=['GET'])  # type: ignore # noqa: F821
 def getsse(dialog_id):
-
+    """
+    提供基于对话ID的SSE(Server-Sent Events)接口，返回对话详情
+    """
     token = request.headers.get('Authorization').split()
     if len(token) != 2:
         return get_data_error_result(message='Authorization is not valid!"')
@@ -140,6 +148,9 @@ def getsse(dialog_id):
 @manager.route('/rm', methods=['POST'])  # noqa: F821
 @login_required
 def rm():
+    """
+    删除指定的会话列表
+    """
     conv_ids = request.json["conversation_ids"]
     try:
         for cid in conv_ids:
@@ -163,6 +174,9 @@ def rm():
 @manager.route('/list', methods=['GET'])  # noqa: F821
 @login_required
 def list_convsersation():
+    """
+    列出与特定对话相关的所有会话
+    """
     dialog_id = request.args["dialog_id"]
     try:
         if not DialogService.query(tenant_id=current_user.id, id=dialog_id):
@@ -184,6 +198,9 @@ def list_convsersation():
 @login_required
 @validate_request("conversation_id", "messages")
 def completion():
+    """
+    实现聊天完成功能，支持流式响应(SSE)，生成对话回复并更新会话记录
+    """
     req = request.json
     msg = []
     for m in req["messages"]:
@@ -262,6 +279,9 @@ def completion():
 @manager.route('/tts', methods=['POST'])  # noqa: F821
 @login_required
 def tts():
+    """
+    文本转语音功能，江输入文本转换为音频流
+    """
     req = request.json
     text = req["text"]
 
@@ -297,6 +317,9 @@ def tts():
 @login_required
 @validate_request("conversation_id", "message_id")
 def delete_msg():
+    """
+    删除指定会话中的某条消息及其相关引用
+    """
     req = request.json
     e, conv = ConversationService.get_by_id(req["conversation_id"])
     if not e:
@@ -320,6 +343,9 @@ def delete_msg():
 @login_required
 @validate_request("conversation_id", "message_id")
 def thumbup():
+    """
+    对会话中的某条信息进行点赞或取消点赞操作，并可添加反馈
+    """
     req = request.json
     e, conv = ConversationService.get_by_id(req["conversation_id"])
     if not e:
@@ -347,6 +373,9 @@ def thumbup():
 @login_required
 @validate_request("question", "kb_ids")
 def ask_about():
+    """
+    根据问题和知识库ID，生成相关答案，支持流失响应
+    """
     req = request.json
     uid = current_user.id
 
@@ -373,6 +402,9 @@ def ask_about():
 @login_required
 @validate_request("question", "kb_ids")
 def mindmap():
+    """
+    根据问题生成思维导图，利用知识库内容提取相关信息
+    """
     req = request.json
     kb_ids = req["kb_ids"]
     e, kb = KnowledgebaseService.get_by_id(kb_ids[0])
@@ -398,6 +430,9 @@ def mindmap():
 @login_required
 @validate_request("question")
 def related_questions():
+    """
+    根据关键词生成相关的搜索词，帮助用户扩展查询范围
+    """
     req = request.json
     question = req["question"]
     chat_mdl = LLMBundle(current_user.id, LLMType.CHAT)

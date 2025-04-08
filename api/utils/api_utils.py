@@ -139,6 +139,9 @@ def error_response(response_code, message=None):
 
 
 def validate_request(*args, **kwargs):
+    """
+    校验必填参数是否存在，参数值是否在允许的范围内
+    """
     def wrapper(func):
         @wraps(func)
         def decorated_function(*_args, **_kwargs):
@@ -212,6 +215,9 @@ def get_json_result(code=settings.RetCode.SUCCESS, message='success', data=None)
 
 
 def apikey_required(func):
+    """
+    验证http请求的apikey是否存在且有效
+    """
     @wraps(func)
     def decorated_function(*args, **kwargs):
         token = flask_request.headers.get('Authorization').split()[1]

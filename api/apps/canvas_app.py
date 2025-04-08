@@ -32,12 +32,18 @@ import time
 @manager.route('/templates', methods=['GET'])  # noqa: F821
 @login_required
 def templates():
+    """
+    获取所有Canvas模板
+    """
     return get_json_result(data=[c.to_dict() for c in CanvasTemplateService.get_all()])
 
 
 @manager.route('/list', methods=['GET'])  # noqa: F821
 @login_required
 def canvas_list():
+    """
+    获取当前用户的所有Canvas列表
+    """
     return get_json_result(data=sorted([c.to_dict() for c in \
                                  UserCanvasService.query(user_id=current_user.id)], key=lambda x: x["update_time"]*-1)
                            )
@@ -47,6 +53,9 @@ def canvas_list():
 @validate_request("canvas_ids")
 @login_required
 def rm():
+    """
+    删除指定ID的Canvas
+    """
     for i in request.json["canvas_ids"]:
         if not UserCanvasService.query(user_id=current_user.id,id=i):
             return get_json_result(
@@ -60,6 +69,9 @@ def rm():
 @validate_request("dsl", "title")
 @login_required
 def save():
+    """
+    保存或更新Canvas信息
+    """
     req = request.json
     req["user_id"] = current_user.id
     if not isinstance(req["dsl"], str):
@@ -88,6 +100,9 @@ def save():
 @manager.route('/get/<canvas_id>', methods=['GET'])  # noqa: F821
 @login_required
 def get(canvas_id):
+    """
+    获得指定Canvas的信息
+    """
     e, c = UserCanvasService.get_by_tenant_id(canvas_id)
     logging.info(f"get canvas_id: {canvas_id} c: {c}")
     if not e:
@@ -96,6 +111,9 @@ def get(canvas_id):
 
 @manager.route('/getsse/<canvas_id>', methods=['GET'])  # type: ignore # noqa: F821
 def getsse(canvas_id):
+    """
+    获得指定Canvas的信息
+    """
     token = request.headers.get('Authorization').split()
     if len(token) != 2:
         return get_data_error_result(message='Authorization is not valid!"')
@@ -113,6 +131,9 @@ def getsse(canvas_id):
 @validate_request("id")
 @login_required
 def run():
+    """
+    执行Canvas操作，支持流式输出
+    """
     req = request.json
     stream = req.get("stream", True)
     e, cvs = UserCanvasService.get_by_id(req["id"])
@@ -194,6 +215,9 @@ def run():
 @validate_request("id")
 @login_required
 def reset():
+    """
+    重置Canvas状态
+    """
     req = request.json
     try:
         e, user_canvas = UserCanvasService.get_by_id(req["id"])
@@ -216,6 +240,9 @@ def reset():
 @manager.route('/input_elements', methods=['GET'])  # noqa: F821
 @login_required
 def input_elements():
+    """
+    获取组件的输入元素
+    """
     cvs_id = request.args.get("id")
     cpn_id = request.args.get("component_id")
     try:
@@ -237,6 +264,9 @@ def input_elements():
 @validate_request("id", "component_id", "params")
 @login_required
 def debug():
+    """
+    调试特定组件
+    """
     req = request.json
     for p in req["params"]:
         assert p.get("key")
@@ -261,6 +291,9 @@ def debug():
 @validate_request("db_type", "database", "username", "host", "port", "password")
 @login_required
 def test_db_connect():
+    """
+    测试数据库链接是否成功
+    """
     req = request.json
     try:
         if req["db_type"] in ["mysql", "mariadb"]:
@@ -295,6 +328,9 @@ def test_db_connect():
 @manager.route('/getlistversion/<canvas_id>', methods=['GET'])  # noqa: F821
 @login_required
 def getlistversion(canvas_id):
+    """
+    获取Canvas的历史版本列表
+    """
     try:
         list =sorted([c.to_dict() for c in UserCanvasVersionService.list_by_canvas_id(canvas_id)], key=lambda x: x["update_time"]*-1)
         return get_json_result(data=list)
@@ -304,6 +340,9 @@ def getlistversion(canvas_id):
 @manager.route('/getversion/<version_id>', methods=['GET'])  # noqa: F821
 @login_required
 def getversion( version_id):
+    """
+    获取特定版本的的详细信息
+    """
     try:
       
         e, version = UserCanvasVersionService.get_by_id(version_id)
@@ -314,6 +353,9 @@ def getversion( version_id):
 @manager.route('/listteam', methods=['GET'])  # noqa: F821
 @login_required
 def list_kbs():
+    """
+    列出用户所属团队的知识库
+    """
     keywords = request.args.get("keywords", "")
     page_number = int(request.args.get("page", 1))
     items_per_page = int(request.args.get("page_size", 150))
@@ -331,6 +373,9 @@ def list_kbs():
 @validate_request("id", "title", "permission")
 @login_required
 def setting():
+    """
+    修改Canvas的基本设置（标题、描述、权限等）
+    """
     req = request.json
     req["user_id"] = current_user.id
     e,flow = UserCanvasService.get_by_id(req["id"])

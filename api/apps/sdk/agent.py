@@ -22,6 +22,9 @@ from flask import request
 @manager.route('/agents', methods=['GET'])  # noqa: F821
 @token_required
 def list_agents(tenant_id):
+    """
+    查询当前租户相关的agent列表
+    """
     id = request.args.get("id")
     title = request.args.get("title")
     if id or title:

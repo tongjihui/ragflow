@@ -30,6 +30,10 @@ from api.utils.api_utils import get_json_result
 @manager.route('/set', methods=['POST'])  # noqa: F821
 @login_required
 def set_dialog():
+    """
+    创建或更新对话（Dialog）信息。如果存在dialog_id，则更新现有对话;
+    否则创建新对话，同时支持设置知识库、LLM模型、提示词配置等参数
+    """
     req = request.json
     dialog_id = req.get("dialog_id")
     name = req.get("name", "New Dialog")
@@ -117,6 +121,9 @@ def set_dialog():
 @manager.route('/get', methods=['GET'])  # noqa: F821
 @login_required
 def get():
+    """
+    根据对话ID获取对话详情，包括关联的知识库名称和ID
+    """
     dialog_id = request.args["dialog_id"]
     try:
         e, dia = DialogService.get_by_id(dialog_id)
@@ -130,6 +137,9 @@ def get():
 
 
 def get_kb_names(kb_ids):
+    """
+    将知识库ID转换为有效的知识库名称列表，过滤掉无效或状态不正确的知识库
+    """
     ids, nms = [], []
     for kid in kb_ids:
         e, kb = KnowledgebaseService.get_by_id(kid)
@@ -143,6 +153,9 @@ def get_kb_names(kb_ids):
 @manager.route('/list', methods=['GET'])  # noqa: F821
 @login_required
 def list_dialogs():
+    """
+    列出当前用户的所有有效对话，并返回每个对话的详细信息，包括关联的知识库名称
+    """
     try:
         diags = DialogService.query(
             tenant_id=current_user.id,
@@ -161,6 +174,9 @@ def list_dialogs():
 @login_required
 @validate_request("dialog_ids")
 def rm():
+    """
+    删除指定的对话列表，将对话状态标记为无效
+    """
     req = request.json
     dialog_list=[]
     tenants = UserTenantService.query(user_id=current_user.id)

@@ -38,6 +38,9 @@ from rag.utils.storage_factory import STORAGE_IMPL
 @login_required
 # @validate_request("parent_id")
 def upload():
+    """
+    上传文件到指定的父文件夹（或根目录），支持多层级路径创建，自动处理文件重名问题，并将文件存储到对象存储中
+    """
     pf_id = request.form.get("parent_id")
 
     if not pf_id:
@@ -124,6 +127,9 @@ def upload():
 @login_required
 @validate_request("name")
 def create():
+    """
+    创建一个新的文件夹或虚拟文件（不涉及实际文件上传），并将其与指定的父文件夹关联
+    """
     req = request.json
     pf_id = request.json.get("parent_id")
     input_file_type = request.json.get("type")
@@ -163,6 +169,9 @@ def create():
 @manager.route('/list', methods=['GET'])  # noqa: F821
 @login_required
 def list_files():
+    """
+    列出指定父文件夹下的所有文件和子文件夹，支持分页、排序和关键词搜索
+    """
     pf_id = request.args.get("parent_id")
 
     keywords = request.args.get("keywords", "")
@@ -195,6 +204,9 @@ def list_files():
 @manager.route('/root_folder', methods=['GET'])  # noqa: F821
 @login_required
 def get_root_folder():
+    """
+    获取当前用户的根文件夹信息
+    """
     try:
         root_folder = FileService.get_root_folder(current_user.id)
         return get_json_result(data={"root_folder": root_folder})
@@ -205,6 +217,9 @@ def get_root_folder():
 @manager.route('/parent_folder', methods=['GET'])  # noqa: F821
 @login_required
 def get_parent_folder():
+    """
+    获取指定文件或文件夹的直接父文件夹信息
+    """
     file_id = request.args.get("file_id")
     try:
         e, file = FileService.get_by_id(file_id)
@@ -220,6 +235,9 @@ def get_parent_folder():
 @manager.route('/all_parent_folder', methods=['GET'])  # noqa: F821
 @login_required
 def get_all_parent_folders():
+    """
+    获取指定文件或文件夹的所有上级文件夹信息
+    """
     file_id = request.args.get("file_id")
     try:
         e, file = FileService.get_by_id(file_id)
@@ -239,6 +257,9 @@ def get_all_parent_folders():
 @login_required
 @validate_request("file_ids")
 def rm():
+    """
+    删除指定的文件或文件夹，如果是文件夹则递归删除其内部所有内容，并清理相关的文档记录
+    """
     req = request.json
     file_ids = req["file_ids"]
     try:
@@ -288,6 +309,9 @@ def rm():
 @login_required
 @validate_request("file_id", "name")
 def rename():
+    """
+    修改文件或文件夹名称，确保名称在同级目录中唯一且文件扩展名不变
+    """
     req = request.json
     try:
         e, file = FileService.get_by_id(req["file_id"])
@@ -325,6 +349,9 @@ def rename():
 @manager.route('/get/<file_id>', methods=['GET'])  # noqa: F821
 @login_required
 def get(file_id):
+    """
+    下载指定文件的内容，支持从对象存储中获取文件二进制数据并返回
+    """
     try:
         e, file = FileService.get_by_id(file_id)
         if not e:
@@ -354,6 +381,9 @@ def get(file_id):
 @login_required
 @validate_request("src_file_ids", "dest_file_id")
 def move():
+    """
+    移动指定的文件或文件夹到目标文件夹下
+    """
     req = request.json
     try:
         file_ids = req["src_file_ids"]

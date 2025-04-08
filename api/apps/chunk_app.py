@@ -41,6 +41,9 @@ import re
 @login_required
 @validate_request("doc_id")
 def list_chunk():
+    """
+    根据文档ID查询并返回执行文档的所有片段列表，支持分页、关键词搜索和排序
+    """
     req = request.json
     doc_id = req["doc_id"]
     page = int(req.get("page", 1))
@@ -89,6 +92,9 @@ def list_chunk():
 @manager.route('/get', methods=['GET'])  # noqa: F821
 @login_required
 def get():
+    """
+    通过Chunk ID查询单个片段的详细信息
+    """
     chunk_id = request.args["chunk_id"]
     try:
         tenants = UserTenantService.query(user_id=current_user.id)
@@ -121,6 +127,9 @@ def get():
 @login_required
 @validate_request("doc_id", "chunk_id", "content_with_weight")
 def set():
+    """
+    更新指定Chunk的内容和其他属性（如关键词、可用性状态等），并重新计算嵌入向量
+    """
     req = request.json
     d = {
         "id": req["chunk_id"],
@@ -174,6 +183,9 @@ def set():
 @login_required
 @validate_request("chunk_ids", "available_int", "doc_id")
 def switch():
+    """
+    批量更新多个 Chunk 的可用性状态
+    """
     req = request.json
     try:
         e, doc = DocumentService.get_by_id(req["doc_id"])
@@ -194,6 +206,9 @@ def switch():
 @login_required
 @validate_request("chunk_ids", "doc_id")
 def rm():
+    """
+    删除指定的 Chunk，并更新相关文档的片段数量统计。
+    """
     req = request.json
     try:
         e, doc = DocumentService.get_by_id(req["doc_id"])
@@ -213,6 +228,9 @@ def rm():
 @login_required
 @validate_request("doc_id", "content_with_weight")
 def create():
+    """
+    创建新的 Chunk，生成唯一 ID，并插入到存储中，同时更新文档的片段数量统计。
+    """
     req = request.json
     chunck_id = xxhash.xxh64((req["content_with_weight"] + req["doc_id"]).encode("utf-8")).hexdigest()
     d = {"id": chunck_id, "content_ltks": rag_tokenizer.tokenize(req["content_with_weight"]),
@@ -263,6 +281,9 @@ def create():
 @login_required
 @validate_request("kb_id", "question")
 def retrieval_test():
+    """
+    根据问题和知识库 ID 进行检索测试，返回最相关的片段列表，支持关键词增强、重排序模型和知识图谱增强。
+    """
     req = request.json
     page = int(req.get("page", 1))
     size = int(req.get("size", 30))
@@ -334,6 +355,9 @@ def retrieval_test():
 @manager.route('/knowledge_graph', methods=['GET'])  # noqa: F821
 @login_required
 def knowledge_graph():
+    """
+    根据文档 ID 查询知识图谱或思维导图数据，支持 JSON 格式的节点和边结构。
+    """
     doc_id = request.args["doc_id"]
     tenant_id = DocumentService.get_tenant_id(doc_id)
     kb_ids = KnowledgebaseService.get_kb_ids(tenant_id)

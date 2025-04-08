@@ -42,6 +42,7 @@ from rag.utils.redis_conn import REDIS_CONN
 def version():
     """
     Get the current version of the application.
+    获取当前应用的版本号，返回版本信息
     ---
     tags:
       - System
@@ -64,6 +65,8 @@ def version():
 @login_required
 def status():
     """
+    检查系统状态，包括文档引擎、存储、数据库和redis的健康状况，并返回每个
+    组件的状态和耗时信息。此外，还提供任务执行器的心跳信息
     Get the system status.
     ---
     tags:
@@ -173,6 +176,7 @@ def status():
 @login_required
 def new_token():
     """
+    为当前用户生成一个新的API Token，并将其保存到数据库中，返回生成的Token信息
     Generate a new API token.
     ---
     tags:
@@ -223,6 +227,7 @@ def new_token():
 @login_required
 def token_list():
     """
+    列出当前用户所有的API Token，返回包含Token名称、创建时间等信息的列表
     List all API tokens for the current user.
     ---
     tags:
@@ -271,6 +276,7 @@ def token_list():
 @login_required
 def rm(token):
     """
+    删除指定的API Token，通过路径参数定位Token并从数据库中移除
     Remove an API token.
     ---
     tags:
@@ -302,6 +308,7 @@ def rm(token):
 @manager.route('/config', methods=['GET'])  # noqa: F821
 def get_config():
     """
+    获取系统的配置信息，例如用户注册是否启用（返回值为0表示禁用，1表示启用）
     Get system configuration.
     ---
     tags:

@@ -35,6 +35,9 @@ class File2DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_by_document_id(cls, document_id):
+        """
+        获取指定doc文件
+        """
         objs = cls.model.select().where(cls.model.document_id == document_id)
         return objs
 
@@ -66,6 +69,9 @@ class File2DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_storage_address(cls, doc_id=None, file_id=None):
+        """
+        根据docid或fileId获取文件的kb_id和存储位置
+        """
         if doc_id:
             f2d = cls.get_by_document_id(doc_id)
         else:

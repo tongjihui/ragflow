@@ -207,6 +207,9 @@ class FileService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_root_folder(cls, tenant_id):
+        """
+        获取指定租户的根文件夹，如果文件夹不存在则创建
+        """
         # Get or create root folder for tenant
         # Args:
         #     tenant_id: Tenant ID
@@ -279,6 +282,9 @@ class FileService(CommonService):
     @classmethod
     @DB.connection_context()
     def init_knowledgebase_docs(cls, root_id, tenant_id):
+        """
+        初始化指定租户的知识库文件夹，如果已存在此文件夹则直接返回
+        """
         # Initialize knowledge base documents
         # Args:
         #     root_id: Root folder ID
