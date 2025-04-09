@@ -43,6 +43,9 @@ class DialogService(CommonService):
     @DB.connection_context()
     def get_list(cls, tenant_id,
                  page_number, items_per_page, orderby, desc, id, name):
+        """
+        获取对话列表，支持分页、排序和条件过滤
+        """
         chats = cls.model.select()
         if id:
             chats = chats.where(cls.model.id == id)
@@ -63,6 +66,9 @@ class DialogService(CommonService):
 
 
 def chat_solo(dialog, messages, stream=True):
+    """
+    单独处理用户输入的消息，生成回答，支持流式输出
+    """
     if llm_id2llm_type(dialog.llm_id) == "image2text":
         chat_mdl = LLMBundle(dialog.tenant_id, LLMType.IMAGE2TEXT, dialog.llm_id)
     else:
@@ -93,6 +99,9 @@ def chat_solo(dialog, messages, stream=True):
 
 
 def chat(dialog, messages, stream=True, **kwargs):
+    """
+    处理用户输入的消息，结合知识库和LLM模型生成回答，支持流式输出
+    """
     assert messages[-1]["role"] == "user", "The last content of this conversation is not from user."
     if not dialog.kb_ids:
         for ans in chat_solo(dialog, messages, stream):
@@ -351,6 +360,13 @@ def chat(dialog, messages, stream=True, **kwargs):
 
 
 def use_sql(question, field_map, tenant_id, chat_mdl, quota=True):
+    """
+    司机用Sql查询数据库，生成回答
+    处理逻辑：
+    构造系统提示词，要求 LLM 模型生成对应的 SQL 语句。
+    执行生成的 SQL 语句，获取查询结果。
+    格式化查询结果为 Markdown 表格形式，并返回。
+    """
     sys_prompt = "You are a Database Administrator. You need to check the fields of the following tables based on the user's list of questions and write the SQL corresponding to the last question."
     user_prompt = """
 Table name: {};
@@ -479,6 +495,9 @@ Please write the SQL, only SQL, without any other explanations or text.
 
 
 def tts(tts_mdl, text):
+    """
+    将文本转换为音频二进制数据
+    """
     if not tts_mdl or not text:
         return
     bin = b""
@@ -488,6 +507,9 @@ def tts(tts_mdl, text):
 
 
 def ask(question, kb_ids, tenant_id):
+    """
+    根据用户输入的问题和指定的知识库，生成回答
+    """
     kbs = KnowledgebaseService.get_by_ids(kb_ids)
     embedding_list = list(set([kb.embd_id for kb in kbs]))
 

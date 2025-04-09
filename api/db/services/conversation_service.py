@@ -32,6 +32,9 @@ class ConversationService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_list(cls, dialog_id, page_number, items_per_page, orderby, desc, id, name, user_id=None):
+        """
+        获取对话会话列表，支持分页、排序和条件过滤
+        """
         sessions = cls.model.select().where(cls.model.dialog_id == dialog_id)
         if id:
             sessions = sessions.where(cls.model.id == id)
@@ -50,6 +53,9 @@ class ConversationService(CommonService):
 
 
 def structure_answer(conv, ans, message_id, session_id):
+    """
+    格式化回答数据，将参考信息和消息内容整合到对话对象中
+    """
     reference = ans["reference"]
     if not isinstance(reference, dict):
         reference = {}
@@ -153,6 +159,9 @@ def completion(tenant_id, chat_id, question, name="New session", session_id=None
 
 
 def iframe_completion(dialog_id, question, session_id=None, stream=True, **kwargs):
+    """
+    为iframe场景设计到对话完成方法，支持创建或查询会话并生成回答
+    """
     e, dia = DialogService.get_by_id(dialog_id)
     assert e, "Dialog not found"
     if not session_id:

@@ -47,6 +47,7 @@ from api.utils.api_utils import get_json_result, construct_response
 @manager.route("/login", methods=["POST", "GET"])  # noqa: F821
 def login():
     """
+    用户登录使用：验证用户邮箱和密码是否匹配，若成功则生成访问令牌并更新用户信息
     User login endpoint.
     ---
     tags:
@@ -118,6 +119,7 @@ def login():
 @manager.route("/github_callback", methods=["GET"])  # noqa: F821
 def github_callback():
     """
+    github回调借口：通过github提供的授权码获取用户信息，根据用户是否存在来进行注册或登录
     GitHub OAuth callback endpoint.
     ---
     tags:
@@ -203,6 +205,7 @@ def github_callback():
 @manager.route("/feishu_callback", methods=["GET"])  # noqa: F821
 def feishu_callback():
     """
+    飞书Oauth回调：通过飞书提供的授权码获取用户信息，根据用户是否存在进行注册或登录
     Feishu OAuth callback endpoint.
     ---
     tags:
@@ -303,6 +306,9 @@ def feishu_callback():
 
 
 def user_info_from_feishu(access_token):
+    """
+    从飞鼠API获取用户信息
+    """
     import requests
 
     headers = {
@@ -318,6 +324,9 @@ def user_info_from_feishu(access_token):
 
 
 def user_info_from_github(access_token):
+    """
+    从github获取用户信息
+    """
     import requests
 
     headers = {"Accept": "application/json", "Authorization": f"token {access_token}"}
@@ -339,6 +348,7 @@ def user_info_from_github(access_token):
 @login_required
 def log_out():
     """
+    用户登出借口：清除用户的访问令牌并注销用户
     User logout endpoint.
     ---
     tags:
@@ -361,6 +371,7 @@ def log_out():
 @login_required
 def setting_user():
     """
+    更新用户设置
     Update user settings.
     ---
     tags:
@@ -433,6 +444,7 @@ def setting_user():
 @login_required
 def user_profile():
     """
+    获取当前用户的个人信息
     Get user profile information.
     ---
     tags:
@@ -459,6 +471,9 @@ def user_profile():
 
 
 def rollback_user_registration(user_id):
+    """
+    回滚用户注册操作
+    """
     try:
         UserService.delete_by_id(user_id)
     except Exception:
@@ -480,6 +495,9 @@ def rollback_user_registration(user_id):
 
 
 def user_register(user_id, user):
+    """
+    注册新用户
+    """
     user["id"] = user_id
     tenant = {
         "id": user_id,
@@ -535,6 +553,7 @@ def user_register(user_id, user):
 @validate_request("nickname", "email", "password")
 def user_add():
     """
+    用户注册接口
     Register a new user.
     ---
     tags:
@@ -629,6 +648,7 @@ def user_add():
 @login_required
 def tenant_info():
     """
+    获取当前用户的租户信息
     Get tenant information.
     ---
     tags:
@@ -668,6 +688,7 @@ def tenant_info():
 @validate_request("tenant_id", "asr_id", "embd_id", "img2txt_id", "llm_id")
 def set_tenant_info():
     """
+    更新租户信息
     Update tenant information.
     ---
     tags:

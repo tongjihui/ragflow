@@ -36,6 +36,9 @@ from rag.nlp import search
 
 
 def trim_header_by_lines(text: str, max_length) -> str:
+    """
+    截取文本头部内容，保留换行符并限制长度
+    """
     # Trim header text to maximum length while preserving line breaks
     # Args:
     #     text: Input text to trim
@@ -70,6 +73,9 @@ class TaskService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_task(cls, task_id):
+        """
+        根据任务ID获取任务的详细信息，并处理充实逻辑和进度更新
+        """
         """Retrieve detailed task information by task ID.
     
         This method fetches comprehensive task details including associated document,
@@ -137,6 +143,9 @@ class TaskService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_tasks(cls, doc_id: str):
+        """
+        获取与指定文档关联的所有任务
+        """
         """Retrieve all tasks associated with a document.
     
         This method fetches all processing tasks for a given document, ordered by page
@@ -168,6 +177,9 @@ class TaskService(CommonService):
     @classmethod
     @DB.connection_context()
     def update_chunk_ids(cls, id: str, chunk_ids: str):
+        """
+        更新任务的分块ID字段
+        """
         """Update the chunk IDs associated with a task.
     
         This method updates the chunk_ids field of a task, which stores the IDs of
@@ -182,6 +194,9 @@ class TaskService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_ongoing_doc_name(cls):
+        """
+        获取当前正在处理的文档名称及其相关信息
+        """
         """Get names of documents that are currently being processed.
     
         This method retrieves information about documents that are in the processing state,
@@ -236,6 +251,9 @@ class TaskService(CommonService):
     @classmethod
     @DB.connection_context()
     def do_cancel(cls, id):
+        """
+        检查任务是否应该被取消，基于关联文档的状态和进度
+        """
         """Check if a task should be cancelled based on its document status.
     
         This method determines whether a task should be cancelled by checking the
@@ -255,6 +273,9 @@ class TaskService(CommonService):
     @classmethod
     @DB.connection_context()
     def update_progress(cls, id, info):
+        """
+        更新任务的进度信息(消息和完成百分比)
+        """
         """Update the progress information for a task.
     
         This method updates both the progress message and completion percentage of a task.
@@ -290,6 +311,9 @@ class TaskService(CommonService):
 
 
 def queue_tasks(doc: dict, bucket: str, name: str, priority: int):
+    """
+    为文档创建并排队处理任务
+    """
     """Create and queue document processing tasks.
     
     This function creates processing tasks for a document based on its type and configuration.
@@ -387,6 +411,9 @@ def queue_tasks(doc: dict, bucket: str, name: str, priority: int):
 
 
 def reuse_prev_task_chunks(task: dict, prev_tasks: list[dict], chunking_config: dict):
+    """
+    尝试复用之前的任务的分块，以优化处理效率
+    """
     """Attempt to reuse chunks from previous tasks for optimization.
     
     This function checks if chunks from previously completed tasks can be reused for

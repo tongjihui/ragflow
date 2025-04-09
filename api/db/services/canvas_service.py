@@ -37,6 +37,9 @@ class UserCanvasService(CommonService):
     @DB.connection_context()
     def get_list(cls, tenant_id,
                  page_number, items_per_page, orderby, desc, id, title):
+        """
+        获取用户画布列表、支持分页、排序和条件过滤
+        """
         agents = cls.model.select()
         if id:
             agents = agents.where(cls.model.id == id)
@@ -55,6 +58,9 @@ class UserCanvasService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_by_tenant_id(cls, pid):
+        """
+        根据画布ID获取单个画布的详细信息
+        """
         try:
             
             fields = [
@@ -87,6 +93,10 @@ class UserCanvasService(CommonService):
                           page_number, items_per_page,
                           orderby, desc, keywords,
                           ):
+        """
+        根据租户id列表和用户ID获取多个画布的详细信息，支持关键词
+        搜索和分页
+        """
         fields = [
             cls.model.id,
             cls.model.avatar,
@@ -121,6 +131,9 @@ class UserCanvasService(CommonService):
    
 
 def completion(tenant_id, agent_id, question, session_id=None, stream=True, **kwargs):
+    """
+    根据用户输入的问题，调用画布canvas进行推理并返回结果，支持流式输出
+    """
     e, cvs = UserCanvasService.get_by_id(agent_id)
     assert e, "Agent not found."
     assert cvs.user_id == tenant_id, "You do not own the agent."

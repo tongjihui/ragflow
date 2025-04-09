@@ -124,6 +124,9 @@ class SerializedField(LongTextField):
 
 
 def is_continuous_field(cls: typing.Type) -> bool:
+    """
+    判断某个字段类型是否为连续型
+    """
     if cls in CONTINUOUS_FIELD_TYPE:
         return True
     for p in cls.__bases__:
@@ -137,14 +140,23 @@ def is_continuous_field(cls: typing.Type) -> bool:
 
 
 def auto_date_timestamp_field():
+    """
+    生成自动日期时间字段名称集合
+    """
     return {f"{f}_time" for f in AUTO_DATE_TIMESTAMP_FIELD_PREFIX}
 
 
 def auto_date_timestamp_db_field():
+    """
+    生成数据库中自动日期时间字段名称集合
+    """
     return {f"f_{f}_time" for f in AUTO_DATE_TIMESTAMP_FIELD_PREFIX}
 
 
 def remove_field_name_prefix(field_name):
+    """
+    移除字段名称中的前缀
+    """
     return field_name[2:] if field_name.startswith('f_') else field_name
 
 
@@ -162,6 +174,9 @@ class BaseModel(Model):
         return self.__dict__['__data__']
 
     def to_human_model_dict(self, only_primary_with: list = None):
+        """
+        将模型对象转换为人类可读的字典格式，支持自定义字段
+        """
         model_dict = self.__dict__['__data__']
 
         if not only_primary_with:
@@ -181,15 +196,24 @@ class BaseModel(Model):
 
     @classmethod
     def get_primary_keys_name(cls):
+        """
+        获取模型的主键字段名称
+        """
         return cls._meta.primary_key.field_names if isinstance(cls._meta.primary_key, CompositeKey) else [
             cls._meta.primary_key.name]
 
     @classmethod
     def getter_by(cls, attr):
+        """
+        通过属性名获取模型的属性值
+        """
         return operator.attrgetter(attr)(cls)
 
     @classmethod
     def query(cls, reverse=None, order_by=None, **kwargs):
+        """
+        根据条件查询模型记录
+        """
         filters = []
         for f_n, f_v in kwargs.items():
             attr_name = '%s' % f_n
@@ -237,6 +261,9 @@ class BaseModel(Model):
 
     @classmethod
     def insert(cls, __data=None, **insert):
+        """
+        插入新纪录，并自动设置createTime字段
+        """
         if isinstance(__data, dict) and __data:
             __data[cls._meta.combined["create_time"]
             ] = utils.current_timestamp()
@@ -248,6 +275,9 @@ class BaseModel(Model):
     # update and insert will call this method
     @classmethod
     def _normalize_data(cls, data, kwargs):
+        """
+        规范化插入或更新的数据，自动设置updateTime和相关字段
+        """
         normalized = super()._normalize_data(data, kwargs)
         if not normalized:
             return {}
@@ -298,6 +328,9 @@ class PostgresDatabaseLock:
         self.db = db if db else DB
 
     def lock(self):
+        """
+        尝试获取pg的分布式锁
+        """
         cursor = self.db.execute_sql("SELECT pg_try_advisory_lock(%s)", self.timeout)
         ret = cursor.fetchone()
         if ret[0] == 0:
@@ -308,6 +341,9 @@ class PostgresDatabaseLock:
             raise Exception(f'failed to acquire lock {self.lock_name}')
 
     def unlock(self):
+        """
+        释放pg的分布式锁
+        """
         cursor = self.db.execute_sql("SELECT pg_advisory_unlock(%s)", self.timeout)
         ret = cursor.fetchone()
         if ret[0] == 0:
@@ -394,6 +430,9 @@ DB.lock = DatabaseLock[settings.DATABASE_TYPE.upper()].value
 
 
 def close_connection():
+    """
+    关闭数据库连接池中过期的连接
+    """
     try:
         if DB:
             DB.close_stale(age=30)
@@ -408,6 +447,9 @@ class DataBaseModel(BaseModel):
 
 @DB.connection_context()
 def init_database_tables(alter_fields=[]):
+    """
+    初始化数据库表结构
+    """
     members = inspect.getmembers(sys.modules[__name__], inspect.isclass)
     table_objs = []
     create_failed_list = []
@@ -428,6 +470,9 @@ def init_database_tables(alter_fields=[]):
 
 
 def fill_db_model_object(model_object, human_model_dict):
+    """
+    填充模型对象的字段值
+    """
     for k, v in human_model_dict.items():
         attr_name = '%s' % k
         if hasattr(model_object.__class__, attr_name):
@@ -1006,6 +1051,9 @@ class UserCanvasVersion(DataBaseModel):
         db_table = "user_canvas_version"
 
 def migrate_db():
+    """
+    执行数据库迁移操作
+    """
     with DB.transaction():
         migrator = DatabaseMigrator[settings.DATABASE_TYPE.upper()].value(DB)
         try:

@@ -29,6 +29,9 @@ from api.utils.api_utils import get_json_result, validate_request, server_error_
 @manager.route("/<tenant_id>/user/list", methods=["GET"])  # noqa: F821
 @login_required
 def user_list(tenant_id):
+    """
+    获取指定租户下的所有用户列表
+    """
     if current_user.id != tenant_id:
         return get_json_result(
             data=False,
@@ -48,6 +51,9 @@ def user_list(tenant_id):
 @login_required
 @validate_request("email")
 def create(tenant_id):
+    """
+    邀请新用户加入指定租户
+    """
     if current_user.id != tenant_id:
         return get_json_result(
             data=False,
@@ -87,6 +93,9 @@ def create(tenant_id):
 @manager.route('/<tenant_id>/user/<user_id>', methods=['DELETE'])  # noqa: F821
 @login_required
 def rm(tenant_id, user_id):
+    """
+    从指定组合中移除某个用户
+    """
     if current_user.id != tenant_id and current_user.id != user_id:
         return get_json_result(
             data=False,
@@ -103,6 +112,9 @@ def rm(tenant_id, user_id):
 @manager.route("/list", methods=["GET"])  # noqa: F821
 @login_required
 def tenant_list():
+    """
+    获取当前登陆用户所属的所有租户列表
+    """
     try:
         users = UserTenantService.get_tenants_by_user_id(current_user.id)
         for u in users:
@@ -115,6 +127,9 @@ def tenant_list():
 @manager.route("/agree/<tenant_id>", methods=["PUT"])  # noqa: F821
 @login_required
 def agree(tenant_id):
+    """
+    当前登陆用户同意加入指定租户
+    """
     try:
         UserTenantService.filter_update([UserTenant.tenant_id == tenant_id, UserTenant.user_id == current_user.id], {"role": UserTenantRole.NORMAL})
         return get_json_result(data=True)

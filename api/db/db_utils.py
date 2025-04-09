@@ -25,6 +25,9 @@ from api.db.db_models import DB, DataBaseModel
 
 @DB.connection_context()
 def bulk_insert_into_db(model, data_source, replace_on_conflict=False):
+    """
+    批量插入数据到数据库
+    """
     DB.create_tables([model])
 
     for i, data in enumerate(data_source):
@@ -52,15 +55,24 @@ def bulk_insert_into_db(model, data_source, replace_on_conflict=False):
 
 
 def get_dynamic_db_model(base, job_id):
+    """
+    根据给定的基础模型和jobId动态生成数据库模型
+    """
     return type(base.model(
         table_index=get_dynamic_tracking_table_index(job_id=job_id)))
 
 
 def get_dynamic_tracking_table_index(job_id):
+    """
+    从jobid中提取前8个自负作为动态表索引
+    """
     return job_id[:8]
 
 
 def fill_db_model_object(model_object, human_model_dict):
+    """
+    将字典形式的人类可读字典数据填充到数据库模型对象中
+    """
     for k, v in human_model_dict.items():
         attr_name = 'f_%s' % k
         if hasattr(model_object.__class__, attr_name):
@@ -87,6 +99,9 @@ supported_operators = {
 
 def query_dict2expression(
         model: type[DataBaseModel], query: dict[str, bool | int | str | list | tuple]):
+    """
+    将查询字典转换为Peewee ORM查询表达式
+    """
     expression = []
 
     for field, value in query.items():
@@ -106,6 +121,9 @@ def query_dict2expression(
 
 def query_db(model: type[DataBaseModel], limit: int = 0, offset: int = 0,
              query: dict = None, order_by: str | list | tuple | None = None):
+    """
+    根据查询条件从数据库中检索数据，并返回结果和总数
+    """
     data = model.select()
     if query:
         data = data.where(query_dict2expression(model, query))

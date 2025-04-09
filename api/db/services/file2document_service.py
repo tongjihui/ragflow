@@ -29,6 +29,9 @@ class File2DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_by_file_id(cls, file_id):
+        """
+        根据fileId获取与该文件关联的所有文档记录
+        """
         objs = cls.model.select().where(cls.model.file_id == file_id)
         return objs
 
@@ -36,7 +39,7 @@ class File2DocumentService(CommonService):
     @DB.connection_context()
     def get_by_document_id(cls, document_id):
         """
-        获取指定doc文件
+        根据docId获取与该文档关联的所有文件记录
         """
         objs = cls.model.select().where(cls.model.document_id == document_id)
         return objs
@@ -44,6 +47,9 @@ class File2DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def insert(cls, obj):
+        """
+        插入新的文件与文档关联记录到数据库
+        """
         if not cls.save(**obj):
             raise RuntimeError("Database error (File)!")
         return File2Document(**obj)
@@ -51,16 +57,25 @@ class File2DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def delete_by_file_id(cls, file_id):
+        """
+        根据fileId删除与该文档关联的所有文件记录
+        """
         return cls.model.delete().where(cls.model.file_id == file_id).execute()
 
     @classmethod
     @DB.connection_context()
     def delete_by_document_id(cls, doc_id):
+        """
+        根据docId删除与该文档关联的所有文件记录
+        """
         return cls.model.delete().where(cls.model.document_id == doc_id).execute()
 
     @classmethod
     @DB.connection_context()
     def update_by_file_id(cls, file_id, obj):
+        """
+        根据fileId更新文件与文档关联记录的更新时间和其他字段
+        """
         obj["update_time"] = current_timestamp()
         obj["update_date"] = datetime_format(datetime.now())
         cls.model.update(obj).where(cls.model.id == file_id).execute()

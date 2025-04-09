@@ -45,6 +45,9 @@ class KnowledgebaseService(CommonService):
     @classmethod
     @DB.connection_context()
     def accessible4deletion(cls, kb_id, user_id):
+        """
+        检查用户是否有权限删除指定的知识库
+        """
         """Check if a knowledge base can be deleted by a specific user.
 
         This method verifies whether a user has permission to delete a knowledge base
@@ -79,6 +82,9 @@ class KnowledgebaseService(CommonService):
     @classmethod
     @DB.connection_context()
     def is_parsed_done(cls, kb_id):
+        """
+        检查知识库中的所有文档是否已完成解析
+        """
         # Check if all documents in the knowledge base have completed parsing
         #
         # Args:
@@ -113,6 +119,9 @@ class KnowledgebaseService(CommonService):
     @classmethod
     @DB.connection_context()
     def list_documents_by_ids(cls, kb_ids):
+        """
+        根据知识库ID列表获取关联的文档ID列表
+        """
         # Get document IDs associated with given knowledge base IDs
         # Args:
         #     kb_ids: List of knowledge base IDs
@@ -132,6 +141,9 @@ class KnowledgebaseService(CommonService):
                           orderby, desc, keywords,
                           parser_id=None
                           ):
+        """
+        根据租户ID列表获取知识库列表，并支持分页和过滤
+        """
         # Get knowledge bases by tenant IDs with pagination and filtering
         # Args:
         #     joined_tenant_ids: List of tenant IDs
@@ -191,6 +203,9 @@ class KnowledgebaseService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_kb_ids(cls, tenant_id):
+        """
+        获取指定租户的所有知识库ID
+        """
         # Get all knowledge base IDs for a tenant
         # Args:
         #     tenant_id: Tenant ID
@@ -206,6 +221,9 @@ class KnowledgebaseService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_detail(cls, kb_id):
+        """
+        获取指定知识库的详细信息
+        """
         # Get detailed information about a knowledge base
         # Args:
         #     kb_id: Knowledge base ID
@@ -238,6 +256,9 @@ class KnowledgebaseService(CommonService):
     @classmethod
     @DB.connection_context()
     def update_parser_config(cls, id, config):
+        """
+        更新知识库的解析器配置
+        """
         # Update parser configuration for a knowledge base
         # Args:
         #     id: Knowledge base ID
@@ -267,6 +288,9 @@ class KnowledgebaseService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_field_map(cls, ids):
+        """
+        获取指定知识库的字段映射
+        """
         # Get field mappings for knowledge bases
         # Args:
         #     ids: List of knowledge base IDs
@@ -281,6 +305,9 @@ class KnowledgebaseService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_by_name(cls, kb_name, tenant_id):
+        """
+        根据名称和租户ID获取知识库
+        """
         # Get knowledge base by name and tenant ID
         # Args:
         #     kb_name: Knowledge base name
@@ -299,6 +326,9 @@ class KnowledgebaseService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_all_ids(cls):
+        """
+        获取所有知识库的ID
+        """
         # Get all knowledge base IDs
         # Returns:
         #     List of all knowledge base IDs
@@ -308,6 +338,9 @@ class KnowledgebaseService(CommonService):
     @DB.connection_context()
     def get_list(cls, joined_tenant_ids, user_id,
                  page_number, items_per_page, orderby, desc, id, name):
+        """
+        获取知识库列表，支持分页、排序和条件过滤
+        """
         # Get list of knowledge bases with filtering and pagination
         # Args:
         #     joined_tenant_ids: List of tenant IDs
@@ -343,6 +376,9 @@ class KnowledgebaseService(CommonService):
     @classmethod
     @DB.connection_context()
     def accessible(cls, kb_id, user_id):
+        """
+        检查用户是否有权限访问指定的知识库
+        """
         # Check if a knowledge base is accessible by a user
         # Args:
         #     kb_id: Knowledge base ID
@@ -360,6 +396,9 @@ class KnowledgebaseService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_kb_by_id(cls, kb_id, user_id):
+        """
+        根据知识库ID和用户ID获取知识库信息
+        """
         # Get knowledge base by ID and user ID
         # Args:
         #     kb_id: Knowledge base ID
@@ -374,6 +413,9 @@ class KnowledgebaseService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_kb_by_name(cls, kb_name, user_id):
+        """
+        根据知识库名称和用户ID获取知识库信息
+        """
         # Get knowledge base by name and user ID
         # Args:
         #     kb_name: Knowledge base name
@@ -388,6 +430,9 @@ class KnowledgebaseService(CommonService):
     @classmethod
     @DB.connection_context()
     def atomic_increase_doc_num_by_id(cls, kb_id):
+        """
+        原子性地增加知识库的文档数量
+        """
         data = {}
         data["update_time"] = current_timestamp()
         data["update_date"] = datetime_format(datetime.now())

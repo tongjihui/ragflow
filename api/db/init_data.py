@@ -39,6 +39,9 @@ def encode_to_base64(input_string):
 
 
 def init_superuser():
+    """
+    初始化超级用户及其相关数据
+    """
     user_info = {
         "id": uuid.uuid1().hex,
         "password": encode_to_base64("admin"),
@@ -96,6 +99,9 @@ def init_superuser():
 
 
 def init_llm_factory():
+    """
+    初始化或更新LLM工厂及其关联的模型信息
+    """
     try:
         LLMService.filter_delete([(LLM.fid == "MiniMax" or LLM.fid == "Minimax")])
         LLMService.filter_delete([(LLM.fid == "cohere")])
@@ -153,6 +159,9 @@ def init_llm_factory():
 
 
 def add_graph_templates():
+    """
+    从指定目录加载徒刑模版文件并保存到数据库中
+    """
     dir = os.path.join(get_project_base_directory(), "agent", "templates")
     for fnm in os.listdir(dir):
         try:
@@ -166,6 +175,9 @@ def add_graph_templates():
 
 
 def init_web_data():
+    """
+    初始化Web应用的数据，包括LLM工厂、超级用户和图形模板
+    """
     start_time = time.time()
 
     init_llm_factory()

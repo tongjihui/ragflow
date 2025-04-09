@@ -37,6 +37,9 @@ class CommonService:
     @classmethod
     @DB.connection_context()
     def query(cls, cols=None, reverse=None, order_by=None, **kwargs):
+        """
+        执行带条件的查询，支持列选择、排序和过滤
+        """
         """Execute a database query with optional column selection and ordering.
     
         This method provides a flexible way to query the database with various filters
@@ -58,6 +61,9 @@ class CommonService:
     @classmethod
     @DB.connection_context()
     def get_all(cls, cols=None, reverse=None, order_by=None):
+        """
+        获取表中所有记录，支持列选择和排序
+        """
         """Retrieve all records from the database with optional column selection and ordering.
     
         This method fetches all records from the model's table with support for
@@ -90,6 +96,9 @@ class CommonService:
     @classmethod
     @DB.connection_context()
     def get(cls, **kwargs):
+        """
+        根据条件获取单条记录
+        """
         """Get a single record matching the given criteria.
     
         This method retrieves a single record from the database that matches
@@ -109,6 +118,9 @@ class CommonService:
     @classmethod
     @DB.connection_context()
     def get_or_none(cls, **kwargs):
+        """
+        根据条件获取单条记录，如果味道到则返回none
+        """
         """Get a single record or None if not found.
     
         This method attempts to retrieve a single record matching the given criteria,
@@ -128,6 +140,9 @@ class CommonService:
     @classmethod
     @DB.connection_context()
     def save(cls, **kwargs):
+        """
+        保存新纪录到数据库
+        """
         """Save a new record to database.
     
         This method creates a new record in the database with the provided field values,
@@ -145,6 +160,9 @@ class CommonService:
     @classmethod
     @DB.connection_context()
     def insert(cls, **kwargs):
+        """
+        插入新纪录，并自动设置时间戳字段
+        """
         """Insert a new record with automatic ID and timestamps.
     
         This method creates a new record with automatically generated ID and timestamp fields.
@@ -168,6 +186,9 @@ class CommonService:
     @classmethod
     @DB.connection_context()
     def insert_many(cls, data_list, batch_size=100):
+        """
+        批量插入多条记录
+        """
         """Insert multiple records in batches.
     
         This method efficiently inserts multiple records into the database using batch processing.
@@ -187,6 +208,9 @@ class CommonService:
     @classmethod
     @DB.connection_context()
     def update_many_by_id(cls, data_list):
+        """
+        批量更新多条记录
+        """
         """Update multiple records by their IDs.
     
         This method updates multiple records in the database, identified by their IDs.
@@ -206,6 +230,9 @@ class CommonService:
     @classmethod
     @DB.connection_context()
     def update_by_id(cls, pid, data):
+        """
+        根据ID更新单条记录
+        """
         # Update a single record by ID
         # Args:
         #     pid: Record ID
@@ -236,6 +263,9 @@ class CommonService:
     @classmethod
     @DB.connection_context()
     def get_by_ids(cls, pids, cols=None):
+        """
+        根据多个ID获取多条记录
+        """
         # Get multiple records by their IDs
         # Args:
         #     pids: List of record IDs
@@ -251,6 +281,9 @@ class CommonService:
     @classmethod
     @DB.connection_context()
     def delete_by_id(cls, pid):
+        """
+        根据ID删除单条记录
+        """
         # Delete a record by ID
         # Args:
         #     pid: Record ID
@@ -261,6 +294,9 @@ class CommonService:
     @classmethod
     @DB.connection_context()
     def filter_delete(cls, filters):
+        """
+        根据条件删除多条记录
+        """
         # Delete records matching given filters
         # Args:
         #     filters: List of filter conditions
@@ -273,6 +309,9 @@ class CommonService:
     @classmethod
     @DB.connection_context()
     def filter_update(cls, filters, update_data):
+        """
+        根据条件更新多条记录
+        """
         # Update records matching given filters
         # Args:
         #     filters: List of filter conditions
@@ -284,6 +323,9 @@ class CommonService:
 
     @staticmethod
     def cut_list(tar_list, n):
+        """
+        将列表按指定大小分割成多个子列表
+        """
         # Split a list into chunks of size n
         # Args:
         #     tar_list: List to split
@@ -299,6 +341,9 @@ class CommonService:
     @DB.connection_context()
     def filter_scope_list(cls, in_key, in_filters_list,
                           filters=None, cols=None):
+        """
+        根据IN子句和额外条件查询多条记录
+        """
         # Get records matching IN clause filters with optional column selection
         # Args:
         #     in_key: Field name for IN clause

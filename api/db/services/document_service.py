@@ -46,6 +46,9 @@ class DocumentService(CommonService):
     @DB.connection_context()
     def get_list(cls, kb_id, page_number, items_per_page,
                  orderby, desc, keywords, id, name):
+        """
+        获取指定知识库中的文档列表，支持分页、排序和条件过滤
+        """
         docs = cls.model.select().where(cls.model.kb_id == kb_id)
         if id:
             docs = docs.where(
@@ -71,6 +74,9 @@ class DocumentService(CommonService):
     @DB.connection_context()
     def get_by_kb_id(cls, kb_id, page_number, items_per_page,
                      orderby, desc, keywords):
+        """
+        根据知识库id获取文档列表，支持分页、排序和关键词过滤
+        """
         if keywords:
             docs = cls.model.select().where(
                 (cls.model.kb_id == kb_id),
@@ -91,6 +97,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def insert(cls, doc):
+        """
+        插入新文档到数据库，并更新对应知识库的文档数量
+        """
         if not cls.save(**doc):
             raise RuntimeError("Database error (Document)!")
         if not KnowledgebaseService.atomic_increase_doc_num_by_id(doc["kb_id"]):
@@ -121,6 +130,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_newly_uploaded(cls):
+        """
+        获取最近上传且尚未处理的文档列表
+        """
         fields = [
             cls.model.id,
             cls.model.kb_id,
@@ -150,6 +162,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_unfinished_docs(cls):
+        """
+        获取尚未完成处理的文档列表
+        """
         fields = [cls.model.id, cls.model.process_begin_at, cls.model.parser_config, cls.model.progress_msg,
                   cls.model.run, cls.model.parser_id]
         docs = cls.model.select(*fields) \
@@ -163,6 +178,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def increment_chunk_num(cls, doc_id, kb_id, token_num, chunk_num, duation):
+        """
+        增加文档的分块数量和令牌数量，并更新对应知识库
+        """
         num = cls.model.update(token_num=cls.model.token_num + token_num,
                                chunk_num=cls.model.chunk_num + chunk_num,
                                process_duation=cls.model.process_duation + duation).where(
@@ -181,6 +199,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def decrement_chunk_num(cls, doc_id, kb_id, token_num, chunk_num, duation):
+        """
+        减少文档的分块数量和令牌数量，并更新对应知识库
+        """
         num = cls.model.update(token_num=cls.model.token_num - token_num,
                                chunk_num=cls.model.chunk_num - chunk_num,
                                process_duation=cls.model.process_duation + duation).where(
@@ -235,6 +256,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_knowledgebase_id(cls, doc_id):
+        """
+        根据文档ID获取知识库ID
+        """
         docs = cls.model.select(cls.model.kb_id).where(cls.model.id == doc_id)
         docs = docs.dicts()
         if not docs:
@@ -244,6 +268,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_tenant_id_by_name(cls, name):
+        """
+        根据文档名称获取租户ID
+        """
         docs = cls.model.select(
             Knowledgebase.tenant_id).join(
             Knowledgebase, on=(
@@ -257,6 +284,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def accessible(cls, doc_id, user_id):
+        """
+        检查用户是否有权限访问指定文档
+        """
         docs = cls.model.select(
             cls.model.id).join(
             Knowledgebase, on=(
@@ -271,6 +301,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def accessible4deletion(cls, doc_id, user_id):
+        """
+        检查用户是否有权限删除指定文档
+        """
         docs = cls.model.select(
             cls.model.id).join(
             Knowledgebase, on=(
@@ -284,6 +317,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_embd_id(cls, doc_id):
+        """
+        根据文档id获取嵌入模型ID
+        """
         docs = cls.model.select(
             Knowledgebase.embd_id).join(
             Knowledgebase, on=(
@@ -297,6 +333,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_chunking_config(cls, doc_id):
+        """
+        获取文档的分块配置
+        """
         configs = (
             cls.model.select(
                 cls.model.id,
@@ -322,6 +361,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_doc_id_by_doc_name(cls, doc_name):
+        """
+        根据文档名称获取文档ID
+        """
         fields = [cls.model.id]
         doc_id = cls.model.select(*fields) \
             .where(cls.model.name == doc_name)
@@ -333,6 +375,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_thumbnails(cls, docids):
+        """
+        获取多个文档的缩略图信息
+        """
         fields = [cls.model.id, cls.model.kb_id, cls.model.thumbnail]
         return list(cls.model.select(
             *fields).where(cls.model.id.in_(docids)).dicts())
@@ -340,6 +385,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def update_parser_config(cls, id, config):
+        """
+        更新文档的解析配置
+        """
         if not config:
             return
         e, d = cls.get_by_id(id)
@@ -365,6 +413,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_doc_count(cls, tenant_id):
+        """
+        获取指定租户的文档总数
+        """
         docs = cls.model.select(cls.model.id).join(Knowledgebase,
                                                    on=(Knowledgebase.id == cls.model.kb_id)).where(
             Knowledgebase.tenant_id == tenant_id)
@@ -373,6 +424,9 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def begin2parse(cls, docid):
+        """
+        标记文档开始解析，并设置初始进度信息
+        """
         cls.update_by_id(
             docid, {"progress": random.random() * 1 / 100.,
                     "progress_msg": "Task is queued...",
@@ -382,11 +436,17 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def update_meta_fields(cls, doc_id, meta_fields):
+        """
+        更新文档的元数据字段
+        """
         return cls.update_by_id(doc_id, {"meta_fields": meta_fields})
 
     @classmethod
     @DB.connection_context()
     def update_progress(cls):
+        """
+        更新所有未完成文档的处理进度
+        """
         docs = cls.get_unfinished_docs()
         for d in docs:
             try:
@@ -446,12 +506,18 @@ class DocumentService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_kb_doc_count(cls, kb_id):
+        """
+        获取指定知识库的文档总数
+        """
         return len(cls.model.select(cls.model.id).where(
             cls.model.kb_id == kb_id).dicts())
 
     @classmethod
     @DB.connection_context()
     def do_cancel(cls, doc_id):
+        """
+        取消文档的处理任务
+        """
         try:
             _, doc = DocumentService.get_by_id(doc_id)
             return doc.run == TaskStatus.CANCEL.value or doc.progress < 0
@@ -461,6 +527,9 @@ class DocumentService(CommonService):
 
 
 def queue_raptor_o_graphrag_tasks(doc, ty, priority):
+    """
+    为文档排队RAPTOR或GraphRag任务
+    """
     chunking_config = DocumentService.get_chunking_config(doc["id"])
     hasher = xxhash.xxh64()
     for field in sorted(chunking_config.keys()):
@@ -487,6 +556,9 @@ def queue_raptor_o_graphrag_tasks(doc, ty, priority):
 
 
 def doc_upload_and_parse(conversation_id, file_objs, user_id):
+    """
+    上传文件并解析为文档，支持多种文件类型（如图片、音频、邮件等）
+    """
     from api.db.services.api_service import API4ConversationService
     from api.db.services.conversation_service import ConversationService
     from api.db.services.dialog_service import DialogService

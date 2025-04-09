@@ -9,6 +9,9 @@ class UserCanvasVersionService(CommonService):
     @classmethod
     @DB.connection_context()
     def list_by_canvas_id(cls, user_canvas_id):
+        """
+        根据userCanvasId获取所有关联的版本记录
+        """
         try:
             user_canvas_version = cls.model.select(
                 *[cls.model.id, 
@@ -28,6 +31,9 @@ class UserCanvasVersionService(CommonService):
     @classmethod
     @DB.connection_context()
     def delete_all_versions(cls, user_canvas_id):
+        """
+        删除指定userCanvasId下超出保留数量的版本记录
+        """
         try:
             user_canvas_version = cls.model.select().where(cls.model.user_canvas_id == user_canvas_id).order_by(cls.model.create_time.desc())
             if user_canvas_version.count() > 20:

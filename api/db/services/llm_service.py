@@ -37,6 +37,9 @@ class TenantLLMService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_api_key(cls, tenant_id, model_name):
+        """
+        根据租户ID和模型名称获取API密钥及相关配置
+        """
         mdlnm, fid = TenantLLMService.split_model_name_and_factory(model_name)
         if not fid:
             objs = cls.query(tenant_id=tenant_id, llm_name=mdlnm)
@@ -49,6 +52,9 @@ class TenantLLMService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_my_llms(cls, tenant_id):
+        """
+        获取指定租户的所有已授权语言模型及其配置
+        """
         fields = [
             cls.model.llm_factory,
             LLMFactories.logo,
@@ -64,6 +70,9 @@ class TenantLLMService(CommonService):
 
     @staticmethod
     def split_model_name_and_factory(model_name):
+        """
+        将模型名称拆分为模型名和工厂名
+        """
         arr = model_name.split("@")
         if len(arr) < 2:
             return model_name, None
@@ -84,6 +93,9 @@ class TenantLLMService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_model_config(cls, tenant_id, llm_type, llm_name=None):
+        """
+        根据租户ID、模型类型和模型名称获取模型配置
+        """
         e, tenant = TenantService.get_by_id(tenant_id)
         if not e:
             raise LookupError("Tenant not found")
@@ -126,6 +138,9 @@ class TenantLLMService(CommonService):
     @DB.connection_context()
     def model_instance(cls, tenant_id, llm_type,
                        llm_name=None, lang="Chinese"):
+        """
+        根据租户ID和模型类型创建语言模型实例
+        """
         model_config = TenantLLMService.get_model_config(tenant_id, llm_type, llm_name)
         if llm_type == LLMType.EMBEDDING.value:
             if model_config["llm_factory"] not in EmbeddingModel:
@@ -173,6 +188,9 @@ class TenantLLMService(CommonService):
     @classmethod
     @DB.connection_context()
     def increase_usage(cls, tenant_id, llm_type, used_tokens, llm_name=None):
+        """
+        增加指定租户的与语言模型使用量（token数）
+        """
         e, tenant = TenantService.get_by_id(tenant_id)
         if not e:
             logging.error(f"Tenant not found: {tenant_id}")
@@ -213,6 +231,9 @@ class TenantLLMService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_openai_models(cls):
+        """
+        获取所有OpenAi提供模型（排除特定嵌入模型）
+        """
         objs = cls.model.select().where(
             (cls.model.llm_factory == "OpenAI"),
             ~(cls.model.llm_name == "text-embedding-3-small"),

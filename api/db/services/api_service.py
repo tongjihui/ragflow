@@ -28,6 +28,9 @@ class APITokenService(CommonService):
     @classmethod
     @DB.connection_context()
     def used(cls, token):
+        """
+        更新ApiToken的使用时间
+        """
         return cls.model.update({
             "update_time": current_timestamp(),
             "update_date": datetime_format(datetime.now()),
@@ -44,6 +47,9 @@ class API4ConversationService(CommonService):
     def get_list(cls, dialog_id, tenant_id,
                  page_number, items_per_page,
                  orderby, desc, id, user_id=None, include_dsl=True):
+        """
+        获取对话列表，支持分页、排序和字段过滤
+        """
         if include_dsl:
             sessions = cls.model.select().where(cls.model.dialog_id == dialog_id)
         else:
@@ -64,12 +70,19 @@ class API4ConversationService(CommonService):
     @classmethod
     @DB.connection_context()
     def append_message(cls, id, conversation):
+        """
+        追加消息到对话中，并更新对话到轮次计数
+        """
         cls.update_by_id(id, conversation)
         return cls.model.update(round=cls.model.round + 1).where(cls.model.id == id).execute()
 
     @classmethod
     @DB.connection_context()
     def stats(cls, tenant_id, from_date, to_date, source=None):
+        """
+        统计对话数据，包括PV（页面浏览量）、UV（独立访客数）、
+        Token总数、总时长、平均轮次和点赞数等
+        """
         if len(to_date) == 10:
             to_date += " 23:59:59"
         return cls.model.select(

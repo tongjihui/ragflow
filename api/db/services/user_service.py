@@ -42,6 +42,9 @@ class UserService(CommonService):
     @classmethod
     @DB.connection_context()
     def filter_by_id(cls, user_id):
+        """
+        根据用户id查询用户信息
+        """
         """Retrieve a user by their ID.
         
         Args:
@@ -59,6 +62,9 @@ class UserService(CommonService):
     @classmethod
     @DB.connection_context()
     def query_user(cls, email, password):
+        """
+        通过邮箱和密码验证用户身份
+        """
         """Authenticate a user with email and password.
         
         Args:
@@ -78,6 +84,9 @@ class UserService(CommonService):
     @classmethod
     @DB.connection_context()
     def save(cls, **kwargs):
+        """
+        保存或创建用户信息
+        """
         if "id" not in kwargs:
             kwargs["id"] = get_uuid()
         if "password" in kwargs:
@@ -94,6 +103,9 @@ class UserService(CommonService):
     @classmethod
     @DB.connection_context()
     def delete_user(cls, user_ids, update_user_dict):
+        """
+        批量删除用户
+        """
         with DB.atomic():
             cls.model.update({"status": 0}).where(
                 cls.model.id.in_(user_ids)).execute()
@@ -101,6 +113,9 @@ class UserService(CommonService):
     @classmethod
     @DB.connection_context()
     def update_user(cls, user_id, user_dict):
+        """
+        更新用户信息
+        """
         with DB.atomic():
             if user_dict:
                 user_dict["update_time"] = current_timestamp()
@@ -123,6 +138,9 @@ class TenantService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_info_by(cls, user_id):
+        """
+        获取用户作为租户所有者的租户信息
+        """
         fields = [
             cls.model.id.alias("tenant_id"),
             cls.model.name,
@@ -141,6 +159,9 @@ class TenantService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_joined_tenants_by_user_id(cls, user_id):
+        """
+        获取用户加入的租户信息
+        """
         fields = [
             cls.model.id.alias("tenant_id"),
             cls.model.name,
@@ -156,6 +177,9 @@ class TenantService(CommonService):
     @classmethod
     @DB.connection_context()
     def decrease(cls, user_id, num):
+        """
+        减少指定租户的信用额度
+        """
         num = cls.model.update(credit=cls.model.credit - num).where(
             cls.model.id == user_id).execute()
         if num == 0:
@@ -164,6 +188,9 @@ class TenantService(CommonService):
     @classmethod
     @DB.connection_context()
     def user_gateway(cls, tenant_id):
+        """
+        根据租户ID计算网关索引
+        """
         hashobj = hashlib.sha256(tenant_id.encode("utf-8"))
         return int(hashobj.hexdigest(), 16)%len(MINIO)
 
@@ -182,6 +209,9 @@ class UserTenantService(CommonService):
     @classmethod
     @DB.connection_context()
     def save(cls, **kwargs):
+        """
+        保存或创建用户与租户的关系记录
+        """
         if "id" not in kwargs:
             kwargs["id"] = get_uuid()
         obj = cls.model(**kwargs).save(force_insert=True)
@@ -190,6 +220,9 @@ class UserTenantService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_by_tenant_id(cls, tenant_id):
+        """
+        获取指定租户下的用户信息
+        """
         fields = [
             cls.model.user_id,
             cls.model.status,
@@ -211,6 +244,9 @@ class UserTenantService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_tenants_by_user_id(cls, user_id):
+        """
+        获取用户所属的租户信息
+        """
         fields = [
             cls.model.tenant_id,
             cls.model.role,

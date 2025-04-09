@@ -29,26 +29,44 @@ class RuntimeConfig(ReloadConfigBase):
 
     @classmethod
     def init_config(cls, **kwargs):
+        """
+        初始化或更新类的配置属性
+        """
         for k, v in kwargs.items():
             if hasattr(cls, k):
                 setattr(cls, k, v)
 
     @classmethod
     def init_env(cls):
+        """
+        初始化运行环境信息，包括版本号
+        """
         cls.ENV.update({"version": get_ragflow_version()})
 
     @classmethod
     def load_config_manager(cls):
+        """
+        标记加载配置管理器的状态
+        """
         cls.LOAD_CONFIG_MANAGER = True
 
     @classmethod
     def get_env(cls, key):
+        """
+        根据键名获取运行环境中的值
+        """
         return cls.ENV.get(key, None)
 
     @classmethod
     def get_all_env(cls):
+        """
+        获取完整的运行环境信息
+        """
         return cls.ENV
 
     @classmethod
     def set_service_db(cls, service_db):
+        """
+        设置服务数据库的配置
+        """
         cls.SERVICE_DB = service_db

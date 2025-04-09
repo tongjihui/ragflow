@@ -41,6 +41,9 @@ class FileService(CommonService):
     @DB.connection_context()
     def get_by_pf_id(cls, tenant_id, pf_id, page_number, items_per_page,
                      orderby, desc, keywords):
+        """
+        根据父文件夹ID获取文件列表，支持分页、排序和关键词过滤
+        """
         # Get files by parent folder ID with pagination and filtering
         # Args:
         #     tenant_id: ID of the tenant
@@ -92,6 +95,9 @@ class FileService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_kb_id_by_file_id(cls, file_id):
+        """
+        根据文件ID获取关联的知识库ID和名称
+        """
         # Get knowledge base IDs associated with a file
         # Args:
         #     file_id: File ID
@@ -112,6 +118,9 @@ class FileService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_by_pf_id_name(cls, id, name):
+        """
+        根据父文件夹ID和文件名获取文件对象
+        """
         # Get file by parent folder ID and name
         # Args:
         #     id: Parent folder ID
@@ -129,6 +138,9 @@ class FileService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_id_list_by_id(cls, id, name, count, res):
+        """
+        递归获取指定文件夹路径下的所有文件ID
+        """
         # Recursively get list of file IDs by traversing folder structure
         # Args:
         #     id: Starting folder ID
@@ -150,6 +162,9 @@ class FileService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_all_innermost_file_ids(cls, folder_id, result_ids):
+        """
+        递归获取指定文件夹下所有最深层级的文件ID
+        """
         # Get IDs of all files in the deepest level of folders
         # Args:
         #     folder_id: Starting folder ID
@@ -167,6 +182,9 @@ class FileService(CommonService):
     @classmethod
     @DB.connection_context()
     def create_folder(cls, file, parent_id, name, count):
+        """
+        递归创建文件夹结构
+        """
         # Recursively create folder structure
         # Args:
         #     file: Current file object
@@ -193,6 +211,9 @@ class FileService(CommonService):
     @classmethod
     @DB.connection_context()
     def is_parent_folder_exist(cls, parent_id):
+        """
+        检查父文件夹是否存在，如果不存在则删除相关文件
+        """
         # Check if parent folder exists
         # Args:
         #     parent_id: Parent folder ID
@@ -237,6 +258,9 @@ class FileService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_kb_folder(cls, tenant_id):
+        """
+        获取租户的知识库文件夹，如果不存在则抛出异常
+        """
         # Get knowledge base folder for tenant
         # Args:
         #     tenant_id: Tenant ID
@@ -253,6 +277,9 @@ class FileService(CommonService):
     @classmethod
     @DB.connection_context()
     def new_a_file_from_kb(cls, tenant_id, name, parent_id, ty=FileType.FOLDER.value, size=0, location=""):
+        """
+        从知识库创建新文件
+        """
         # Create a new file from knowledge base
         # Args:
         #     tenant_id: Tenant ID
@@ -302,6 +329,9 @@ class FileService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_parent_folder(cls, file_id):
+        """
+        获取文件的父文件夹
+        """
         # Get parent folder of a file
         # Args:
         #     file_id: File ID
@@ -319,6 +349,9 @@ class FileService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_all_parent_folders(cls, start_id):
+        """
+        获取文件的所有上级文件夹路径
+        """
         # Get all parent folders in path
         # Args:
         #     start_id: Starting file ID
@@ -339,6 +372,9 @@ class FileService(CommonService):
     @classmethod
     @DB.connection_context()
     def insert(cls, file):
+        """
+        插入新的文件记录到数据库
+        """
         # Insert a new file record
         # Args:
         #     file: File data dictionary
@@ -351,17 +387,26 @@ class FileService(CommonService):
     @classmethod
     @DB.connection_context()
     def delete(cls, file):
+        """
+        根据文件ID删除文件
+        """
         #
         return cls.delete_by_id(file.id)
 
     @classmethod
     @DB.connection_context()
     def delete_by_pf_id(cls, folder_id):
+        """
+        根据父文件夹ID删除所有子文件
+        """
         return cls.model.delete().where(cls.model.parent_id == folder_id).execute()
 
     @classmethod
     @DB.connection_context()
     def delete_folder_by_pf_id(cls, user_id, folder_id):
+        """
+        递归删除文件夹及其所有子文件
+        """
         try:
             files = cls.model.select().where((cls.model.tenant_id == user_id)
                                              & (cls.model.parent_id == folder_id))
@@ -376,12 +421,18 @@ class FileService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_file_count(cls, tenant_id):
+        """
+        获取租户的文件总数
+        """
         files = cls.model.select(cls.model.id).where(cls.model.tenant_id == tenant_id)
         return len(files)
 
     @classmethod
     @DB.connection_context()
     def get_folder_size(cls, folder_id):
+        """
+        递归计算文件夹的总大小
+        """
         size = 0
 
         def dfs(parent_id):
@@ -398,6 +449,9 @@ class FileService(CommonService):
     @classmethod
     @DB.connection_context()
     def add_file_from_kb(cls, doc, kb_folder_id, tenant_id):
+        """
+        从知识库添加文件到文件系统
+        """
         for _ in File2DocumentService.get_by_document_id(doc["id"]):
             return
         file = {
@@ -417,6 +471,9 @@ class FileService(CommonService):
     @classmethod
     @DB.connection_context()
     def move_file(cls, file_ids, folder_id):
+        """
+        移除文件到指定的目标文件夹
+        """
         try:
             cls.filter_update((cls.model.id << file_ids, ), { 'parent_id': folder_id })
         except Exception:
@@ -426,6 +483,9 @@ class FileService(CommonService):
     @classmethod
     @DB.connection_context()
     def upload_document(self, kb, file_objs, user_id):
+        """
+        上传文件并将其转换文档，同时存储到知识库和文件系统
+        """
         root_folder = self.get_root_folder(user_id)
         pf_id = root_folder["id"]
         self.init_knowledgebase_docs(pf_id, user_id)
@@ -486,6 +546,9 @@ class FileService(CommonService):
 
     @staticmethod
     def parse_docs(file_objs, user_id):
+        """
+        解析多个文件的内容
+        """
         from rag.app import presentation, picture, naive, audio, email
 
         def dummy(prog=None, msg=""):
@@ -521,6 +584,9 @@ class FileService(CommonService):
 
     @staticmethod
     def get_parser(doc_type, filename, default):
+        """
+        根据文件类型和名称选择合适的解析器
+        """
         if doc_type == FileType.VISUAL:
             return ParserType.PICTURE.value
         if doc_type == FileType.AURAL:
